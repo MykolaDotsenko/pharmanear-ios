@@ -1,24 +1,27 @@
-# Candidate review checklist
+# Verification record
 
-## AI-assisted work
-The initial implementation, tests and ADR were generated with ChatGPT assistance. Review code and decisions personally before submitting. Do not claim independent reviewer approval, simulator testing, deployment or production usage until performed.
+What is verified, how, and what still needs a person.
 
-## Manual acceptance checklist (pending)
-- Start with no location permission and confirm no provider request occurs until explicit action.
-- Grant location permission; verify results with a known location and compare with an independent map.
-- Deny permission and select Turku or Helsinki; verify city centre is clearly indicated.
-- Simulate slow network, HTTP error, empty response and cancellation; verify stale results never reappear.
-- Switch EN/FI/SV before and during a search; review copy with native speakers.
-- Use keyboard and screen reader (web), or VoiceOver and large Dynamic Type (iOS).
-- Check small screens, high contrast, zoom and dark mode where supported.
-- Verify map links, opening-hours disclaimer, and OSM attribution.
-- Inspect network requests to confirm rounded coordinates only, no analytics, and no personal secrets.
-- Run GitHub Actions; verify build and test results; perform human code review before applying.
+## Automated on every push (iOS CI, macOS 15, Xcode 16)
 
-## Known gaps
-No live provider smoke test, end-to-end UI automation, independent accessibility audit or production-grade availability guarantees. iOS full compilation needs Apple SDK. Do not represent these checks as passed until verified.
+| Check                          | What it proves                                                                                   |
+| ------------------------------ | ------------------------------------------------------------------------------------------------ |
+| `scripts/check-strings.py`     | Every interface literal has a catalog key; every key is used and translated to fi and sv         |
+| `swift-format lint --strict`   | Package, tests and app follow the checked-in style                                               |
+| 40 `PharmacyCore` tests        | Geometry, ranking, coverage, OSM decoding, catalog freshness, refresh caching and back-off, live fallback, transport fallback, and the search lifecycle: cancellation, superseded searches, denial, retry |
+| Simulator build                | The app target compiles and links the package                                                    |
 
-The native design refresh adds five core regression tests. UI validation on an iPhone simulator and VoiceOver review remain pending; CI compiles the SwiftUI target but does not replace manual UI testing.
+Manual workflow runs also install the app on a simulator and capture light, dark, Finnish and Swedish
+screenshots as the `ios-ui-evidence` artifact.
 
-## Release gate
-Check core tests, simulator build, map sheet interaction, largest Dynamic Type, dark mode, VoiceOver, and live provider responses. Mapped schedules are not proof of current opening hours. Capture actual simulator screenshots for the README only after these checks pass.
+## Needs a person
+
+- [ ] VoiceOver on a device: reading order, the announcement after a search, the map sheet, the language
+      button's hint.
+- [ ] Largest accessibility text size (AX5): nothing truncated or overlapping.
+- [ ] Location permission flow: allow once, allow while using, deny, and changing it later in Settings.
+- [ ] Per-app language in Settings for Finnish and Swedish; native speakers review the copy.
+- [ ] A known location compared with an independent map.
+- [ ] Offline launch with the bundled catalog.
+
+Automated checks do not establish accessibility conformance on their own.

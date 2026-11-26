@@ -1,6 +1,7 @@
 # ADR 0001: bounded geospatial search with data minimization
 
-Status: accepted for the exercise; production validation pending.
+Status: accepted. Since [ADR 0002](0002-local-catalog.md) this live search is the fallback behind an on-device
+catalog; everything below still applies to it.
 
 ## Context
 The application must find pharmacies without requiring registration. The service should handle denial of location permission and unreliable networks. The search must not need a secret embedded in a client.

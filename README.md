@@ -1,53 +1,82 @@
 # PharmaNear — iOS
 
-A small, independent pharmacy finder built as a Treat Health engineering application exercise. Not affiliated with Treat Health and not medical advice.
+A small, independent pharmacy finder for Finland in SwiftUI, built as a Treat Health engineering exercise. Not
+affiliated with Treat Health and not medical advice. The web version is
+[pharmanear-web](https://github.com/MykolaDotsenko/pharmanear-web).
 
 ## What it does
-- On explicit request, obtains a device position; alternatively search from one of five Finnish city centres.
-- Queries OpenStreetMap pharmacies via Overpass, expanding the search from 3 km to 10 km to 30 km if needed.
-- Calculates great-circle distances on the device and presents the closest returned mapped pharmacies first (up to 20 displayed).
-- Opens a selected pharmacy in a map application/site; supports English, Finnish and Swedish.
-- Handles permission denial, loading, cancellation, empty results, and provider failures without displaying stale search results.
 
-## Privacy and limitations
-No account, analytics, location history or persistent application storage. The search sends a coordinate rounded to two decimal places (not anonymous; the external provider also receives normal network metadata, including IP address). The device-provided position is retained in memory during the search and used for distance calculation. Location precision depends on the OS/browser; distances are straight-line estimates, not travel distance. Map links only open on request and are external services with their own privacy policies. OpenStreetMap may be incomplete, and building centres may differ from entrances. The nearest result means nearest returned mapped location within the bounded search, not a guarantee of the nearest real-world pharmacy. No opening-hours claims are made. Public Overpass is best-effort, not an SLA-backed production service. Production rollout would require a reviewed EU-hosted provider or self-hosted dataset, rate limiting, monitoring and licensing review. See [ADR](docs/0001-search-and-privacy.md).
+- Finds the closest mapped pharmacies to the device position, asking for location permission only when you tap
+  _Use my location_, or to one of five Finnish city centres.
+- Searches a dated national OpenStreetMap catalog **on the device**; no coordinates leave the phone.
+- Falls back to live Overpass queries only when the catalog cannot serve the area, sending a coordinate rounded
+  to two decimals and widening from 3 to 10 to 30 km.
+- Ranks by straight-line distance and shows up to 20 results (5 at first), with an in-app MapKit preview or
+  _Open in Maps_ on request.
+- Shows community-mapped opening hours, always labelled as unverified, and links to Apteekki.fi.
+- English, Finnish and Swedish from String Catalogs, following the system or per-app language; Dynamic Type up
+  to the accessibility sizes, VoiceOver, dark mode, Reduce Motion, and a quiet seasonal palette from
+  25 November to 6 January.
+- Handles denied permission, slow or failed providers, cancellation and empty areas without ever showing a
+  stale result.
 
-Data © [OpenStreetMap contributors](https://www.openstreetmap.org/copyright), ODbL. No OSM data is bundled.
+## Data and privacy
+
+The catalog is the same validated Geofabrik extract the web app publishes weekly, bundled in the
+`PharmacyCore` package. When the bundled copy is more than a week old the app downloads the newest published
+copy from a fixed URL (no coordinates, no identifiers), keeps it in memory, and never uses data older than
+30 days. See [ADR 0002](docs/0002-local-catalog.md).
+
+No account, analytics, persistent storage or location history. MapKit and the live fallback are third-party
+services that receive normal network metadata. OpenStreetMap can be incomplete and is not the official
+register; a building centre is not an entrance. See [ADR 0001](docs/0001-search-and-privacy.md).
+
+Data © [OpenStreetMap contributors](https://www.openstreetmap.org/copyright), available under the
+[Open Database License 1.0](https://opendatacommons.org/licenses/odbl/1-0/).
 
 ## Run locally
-Requires macOS with Xcode 16+ and an iOS 16+ simulator/device.
 
-1. Open `PharmaNear.xcodeproj` in Xcode.
-2. Select the PharmaNear scheme and an iPhone simulator.
-3. Run (Cmd+R). Select a simulated location or search a city centre.
+Xcode 16 or later; the app runs on iOS 16 and later. There are no third-party dependencies or API keys.
+
+1. Open `PharmaNear.xcodeproj` and run the _PharmaNear_ scheme on an iPhone simulator.
+2. Use _Features › Location_ in the simulator to set a position, or search from a city centre.
+3. To see Finnish or Swedish, tap the globe button (it opens the app's page in Settings, where _Language_ is
+   available), or set _App Language_ in the scheme's Run options.
 
 ```sh
-swift test
-xcodebuild -project PharmaNear.xcodeproj -scheme PharmaNear -configuration Debug -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build
+swift test                                   # PharmacyCore tests (macOS or Linux)
+python3 scripts/check-strings.py             # String Catalogs against the sources
+xcrun swift-format lint --strict --recursive Package.swift Sources Tests App
+xcodebuild -project PharmaNear.xcodeproj -scheme PharmaNear \
+  -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build
 ```
 
-For a physical iPhone, select your own signing team in Xcode. No external Swift dependencies or API keys are required.
+For a physical iPhone, select your own signing team in Xcode.
 
-## Structure
-- `App/PharmaNearApp.swift`: SwiftUI, observable search state, CoreLocation and MapKit.
-- `Sources/PharmacyCore/Core.swift`: pure Swift search logic and HTTP client, built into the app and separately tested as a Swift package.
-- `Tests/PharmacyCoreTests/CoreTests.swift`: XCTest coverage.
-- `.github/workflows/ci.yml`: Swift tests and simulator build on macOS.
+## Project layout
+
+| Path                                        | Responsibility                                                       |
+| ------------------------------------------- | -------------------------------------------------------------------- |
+| `Sources/PharmacyCore/Core.swift`           | Geometry, OSM decoding, ranking, coverage, cities                    |
+| `Sources/PharmacyCore/PharmacyCatalog.swift`| On-device catalog, freshness, refresh and live fallback (an actor)   |
+| `Sources/PharmacyCore/OverpassClient.swift` | Overpass transport with one independent fallback                     |
+| `Sources/PharmacyCore/SearchSession.swift`  | Search lifecycle and the `LocationProviding` boundary                |
+| `App/DeviceLocation.swift`                  | Core Location as a cancellable `async` request                       |
+| `App/ContentView.swift` and views           | `SearchHeader`, `ResultsSection`, `PharmacyRow`, `PharmacyMapSheet`  |
+| `App/Localizable.xcstrings`                 | All copy in English, Finnish and Swedish                             |
+| `App/InfoPlist.xcstrings`                   | The location permission prompt in all three languages                |
+| `App/NordicDesign.swift`                    | Palette, button style and decorative artwork                         |
+
+[docs/architecture.md](docs/architecture.md) explains the boundaries and the Apple guidance behind them.
 
 ## Verification
-The original core implementation reported eight passing tests. Five new XCTest scenarios cover result limits, pharmacy filtering, deterministic ranking, cancellation and search expansion. The refreshed revision must pass CI before submission. The Apple SDK is unavailable in the isolated environment, so the SwiftUI target is not yet compiled or tested on a simulator. The macOS CI build is required before submission; run the manual checklist too.
+
+Every push runs the String Catalog check, swift-format in strict mode, 40 `PharmacyCore` tests (search rules,
+catalog policy, transport, and the search lifecycle including cancellation and superseded searches) and a
+simulator build on macOS. A manual run of the workflow also captures light, dark, Finnish and Swedish
+screenshots. [docs/review.md](docs/review.md) records what is verified and what still needs a person.
 
 ## Engineering process
-AI-assisted implementation was used. See [review checklist and limitations](docs/review.md). This is an initial candidate deliverable, not a claim of production certification.
 
-## Design
-The native UI follows Finnish functionalism with paper/pine tones, a scalable system serif heading, decorative Canvas contour art (not a geographic map), native navigation, numbered result rows, adaptive city controls for accessibility text sizes, dark mode and reduced-motion-aware button and result transitions. No additional dependencies or remote visual assets.
-
-## Manual UI verification
-On an iPhone simulator test location permission denial, city search, cancellation, locale changes, dark mode, largest Dynamic Type and VoiceOver. The SwiftUI target requires macOS/Xcode; no claim of simulator or accessibility certification is made.
-
-## Map, schedules and icon
-The native MapKit sheet opens only on explicit selection. Opening hours are community-sourced OSM strings, explicitly unverified; use the Apteekki.fi link or pharmacy website for confirmation. The asset catalog contains a custom 1024px RGB app icon. The existing CI builds for an iOS simulator; manual UI validation remains required.
-
-## Architecture
-See [architecture notes](docs/architecture.md) for file responsibilities, state ownership, cancellation and official Apple references. The minimum deployment target remains iOS 16.
+Implementation was AI-assisted; the author reviews every change. The checks above, not the tooling, are what
+the claims in this document rest on.
