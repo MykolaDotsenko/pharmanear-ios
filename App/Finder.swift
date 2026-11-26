@@ -1,3 +1,4 @@
+import PharmacyCore
 import Foundation
 import Combine
 import CoreLocation
@@ -36,7 +37,7 @@ final class Finder: NSObject, ObservableObject, CLLocationManagerDelegate {
     private var requestedLocation = false
 
     init(load: @escaping @Sendable (Point) async throws -> SearchResult = { point in
-        try await PharmacySearch.search(origin: point, fetch: { try await PharmacySearch.fetch(query: $0) })
+        try await PharmacySearch.search(origin: point, fetch: { try await OverpassClient.shared.fetch(query: $0) })
     }) {
         self.load = load
         super.init()
