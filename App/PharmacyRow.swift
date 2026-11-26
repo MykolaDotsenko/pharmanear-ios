@@ -36,7 +36,8 @@ struct PharmacyRow: View {
             HStack(alignment: .top, spacing: 12) {
                 // Never compressed by a long name beside it, so the number is never cut off at large text sizes.
                 Text(rank, format: .number.precision(.integerLength(2)))
-                    .font(.caption.monospacedDigit())
+                    .font(.caption)
+                    .monospacedDigit()
                     .foregroundStyle(palette.muted)
                     .fixedSize()
                     .accessibilityHidden(true)

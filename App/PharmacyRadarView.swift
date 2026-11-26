@@ -156,7 +156,8 @@ struct PharmacyRadarView: View {
                 .font(.caption)
                 .foregroundStyle(palette.muted)
             Text(verbatim: formatted(guidance.distance))
-                .font(.largeTitle.monospacedDigit())
+                .font(.largeTitle)
+                .monospacedDigit()
             if let sector = guidance.sector {
                 Text(verbatim: direction(sector, relative: guidance.isRelative))
                     .font(.title3.weight(.semibold))

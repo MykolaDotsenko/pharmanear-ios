@@ -84,9 +84,10 @@ For a physical iPhone, select your own signing team in Xcode.
 
 Every push runs the String Catalog check, swift-format in strict mode, the `PharmacyCore` tests (search rules,
 catalog policy, transport, and the search lifecycle including cancellation and superseded searches) and the
-XCUITest flows on an iPhone simulator (city search, result details, show more, the map sheet, Finnish and
-Swedish, and Apple's accessibility audit). Screenshots from the UI tests are uploaded with every run; a manual
-run also captures the start screen in light, dark, Finnish and Swedish. [docs/review.md](docs/review.md) records what is verified and what still needs a person.
+XCUITest flows on an iPhone simulator (city search, result details, show more, the map sheet, the radar from a
+row, Finnish and Swedish, and Apple's accessibility audit). Screenshots from the UI tests are uploaded with every
+run; a manual run also captures the start screen in light, dark, Finnish and Swedish, and with _log_screenshots_
+prints a small contact sheet of them to the log for anyone who cannot download artifacts. [docs/review.md](docs/review.md) records what is verified and what still needs a person.
 
 ## Engineering process
 

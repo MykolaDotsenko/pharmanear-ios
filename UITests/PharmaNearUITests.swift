@@ -123,19 +123,23 @@ final class PharmaNearUITests: XCTestCase {
         }
     }
 
-    /// Runs Apple's accessibility audit and logs every issue with the element it concerns. Navigation bar
-    /// titles are exempt from the Dynamic Type check: by design they keep their size and offer the Large
-    /// Content Viewer instead. Every other issue fails the test.
+    /// Runs Apple's accessibility audit and logs every issue with the element it concerns. The titles and
+    /// buttons of every navigation bar, a sheet's included, are exempt from the Dynamic Type check: by design
+    /// they keep their size and offer the Large Content Viewer instead. Every other issue fails the test.
     @available(iOS 17.0, *)
     private func audit(_ app: XCUIApplication) throws {
-        let navigationBar = app.navigationBars.firstMatch.frame
+        let navigationBars = app.navigationBars.allElementsBoundByIndex.map(\.frame)
         try app.performAccessibilityAudit { issue in
             let element = issue.element
             print(
                 "Accessibility audit: \(issue.compactDescription); type \(element?.elementType.rawValue ?? 0),",
                 "label “\(element?.label ?? "")”, identifier “\(element?.identifier ?? "")”, frame \(element?.frame ?? .zero)"
             )
-            if issue.auditType == .dynamicType, let element, navigationBar.contains(element.frame) { return true }
+            if issue.auditType == .dynamicType, let element,
+                navigationBars.contains(where: { $0.contains(element.frame) })
+            {
+                return true
+            }
             return false
         }
     }
