@@ -1,0 +1,11 @@
+name: iOS CI
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  test-and-build:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - run: swift test
+      - run: xcodebuild -project PharmaNear.xcodeproj -scheme PharmaNear -configuration Debug -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build
