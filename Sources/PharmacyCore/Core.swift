@@ -50,6 +50,15 @@ public struct SearchResult: Sendable {
     public let radius: Int
     public let covered: Bool
 
+    public let sourceDate: String?
+
+    public init(pharmacies: [Pharmacy], radius: Int, covered: Bool, sourceDate: String? = nil) {
+        self.pharmacies = pharmacies
+        self.radius = radius
+        self.covered = covered
+        self.sourceDate = sourceDate
+    }
+
     public var visiblePharmacies: [Pharmacy] { Array(pharmacies.prefix(20)) }
 }
 
