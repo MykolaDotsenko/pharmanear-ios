@@ -47,10 +47,13 @@ Xcode 16 or later; the app runs on iOS 16 and later. There are no third-party de
 ```sh
 swift test                                   # PharmacyCore tests (macOS or Linux)
 python3 scripts/check-strings.py             # String Catalogs against the sources
-xcrun swift-format lint --strict --recursive Package.swift Sources Tests App
-xcodebuild -project PharmaNear.xcodeproj -scheme PharmaNear \
-  -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build
+xcrun swift-format lint --strict --recursive Package.swift Sources Tests App UITests
+xcodebuild test -project PharmaNear.xcodeproj -scheme PharmaNear \
+  -destination 'platform=iOS Simulator,name=iPhone 16'   # builds the app and runs the UI tests
 ```
+
+The UI tests launch the app with `PHARMANEAR_CATALOG_DATE`, which makes a Debug build read the bundled catalog
+as of that date with no network, so they see the same pharmacies on any day.
 
 For a physical iPhone, select your own signing team in Xcode.
 
@@ -67,15 +70,17 @@ For a physical iPhone, select your own signing team in Xcode.
 | `App/Localizable.xcstrings`                 | All copy in English, Finnish and Swedish                             |
 | `App/InfoPlist.xcstrings`                   | The location permission prompt in all three languages                |
 | `App/NordicDesign.swift`                    | Palette, button style and decorative artwork                         |
+| `UITests/PharmaNearUITests.swift`           | XCUITest flows and Apple's accessibility audit                       |
 
 [docs/architecture.md](docs/architecture.md) explains the boundaries and the Apple guidance behind them.
 
 ## Verification
 
-Every push runs the String Catalog check, swift-format in strict mode, 40 `PharmacyCore` tests (search rules,
-catalog policy, transport, and the search lifecycle including cancellation and superseded searches) and a
-simulator build on macOS. A manual run of the workflow also captures light, dark, Finnish and Swedish
-screenshots. [docs/review.md](docs/review.md) records what is verified and what still needs a person.
+Every push runs the String Catalog check, swift-format in strict mode, the `PharmacyCore` tests (search rules,
+catalog policy, transport, and the search lifecycle including cancellation and superseded searches) and the
+XCUITest flows on an iPhone simulator (city search, result details, show more, the map sheet, Finnish and
+Swedish, and Apple's accessibility audit). Screenshots from the UI tests are uploaded with every run; a manual
+run also captures the start screen in light, dark, Finnish and Swedish. [docs/review.md](docs/review.md) records what is verified and what still needs a person.
 
 ## Engineering process
 

@@ -7,12 +7,12 @@ What is verified, how, and what still needs a person.
 | Check                          | What it proves                                                                                   |
 | ------------------------------ | ------------------------------------------------------------------------------------------------ |
 | `scripts/check-strings.py`     | Every interface literal has a catalog key; every key is used and translated to fi and sv         |
-| `swift-format lint --strict`   | Package, tests and app follow the checked-in style                                               |
-| 40 `PharmacyCore` tests        | Geometry, ranking, coverage, OSM decoding, catalog freshness, refresh caching and back-off, live fallback, transport fallback, and the search lifecycle: cancellation, superseded searches, denial, retry |
-| Simulator build                | The app target compiles and links the package                                                    |
+| `swift-format lint --strict`   | Package, tests, app and UI tests follow the checked-in style                                     |
+| 41 `PharmacyCore` tests        | Geometry, ranking, coverage, OSM decoding, catalog freshness, refresh caching and back-off, live fallback, transport fallback, and the search lifecycle: cancellation, superseded searches, denial, retry |
+| 7 XCUITest flows               | On an iPhone simulator, offline with the bundled catalog at a fixed date: Turku search ranks Yliopiston Apteekki first, result details show the catalog date and scope, show more and fewer, the map sheet opens and closes, Finnish and Swedish copy with plural forms and city names, and Apple's accessibility audit of the start and result screens (iOS 17 and later) |
 
-Manual workflow runs also install the app on a simulator and capture light, dark, Finnish and Swedish
-screenshots as the `ios-ui-evidence` artifact.
+Screenshots from the UI tests are uploaded as `ios-ui-test-screenshots` on every run. Manual workflow runs also
+capture the start screen in light, dark, Finnish and Swedish as `ios-ui-evidence`.
 
 ## Needs a person
 
