@@ -39,6 +39,9 @@ struct ResultsSection: View {
                 Button("Pharmacy radar") { showRadar(result.pharmacies) }
                     .buttonStyle(NordicButton(palette: palette, primary: false))
                     .accessibilityIdentifier("open-radar")
+                Text("Opening hours are from OpenStreetMap unless a checked source is shown. Confirm before travelling.")
+                    .font(.footnote)
+                    .foregroundStyle(palette.muted)
                 list(of: result)
             }
         }
@@ -98,12 +101,22 @@ struct ResultsSection: View {
         }
     }
 
+    private func isPossibleDuplicate(_ pharmacy: Pharmacy, in results: [Pharmacy]) -> Bool {
+        pharmacy.name.isEmpty && pharmacy.address.isEmpty && pharmacy.hours.isEmpty
+            && results.contains {
+                $0.id != pharmacy.id && !$0.name.isEmpty && pharmacy.point.distance(to: $0.point) <= 10
+            }
+    }
+
     @ViewBuilder
     private func list(of result: SearchResult) -> some View {
         let shown = result.visiblePharmacies.prefix(showsAll ? SearchResult.visibleLimit : Self.initialCount)
         LazyVStack(alignment: .leading, spacing: 0) {
             ForEach(Array(shown.enumerated()), id: \.element.id) { index, pharmacy in
-                PharmacyRow(pharmacy: pharmacy, rank: index + 1, palette: palette) { showMap(pharmacy) }
+                PharmacyRow(
+                    pharmacy: pharmacy, rank: index + 1, palette: palette,
+                    possibleDuplicate: isPossibleDuplicate(pharmacy, in: result.pharmacies)
+                ) { showMap(pharmacy) }
             }
         }
         if result.pharmacies.count > Self.initialCount {

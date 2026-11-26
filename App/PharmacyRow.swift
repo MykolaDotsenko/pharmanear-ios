@@ -2,19 +2,52 @@ import MapKit
 import PharmacyCore
 import SwiftUI
 
-/// One ranked pharmacy. The nearest is emphasised; hours are always labelled as unverified.
+/// One ranked pharmacy, with source-aware details and explicit missing data.
 struct PharmacyRow: View {
     let pharmacy: Pharmacy
     let rank: Int
     let palette: NordicPalette
+    let possibleDuplicate: Bool
     let showMap: () -> Void
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
+    private struct Review {
+        let name: String
+        let point: Point
+        let address: String
+        let hours: String
+        let url: URL
+    }
+
+    // A dated source comparison, not a live opening-status feed.
+    private var reviewed: Review? {
+        let record: Review
+        switch pharmacy.id {
+        case "node/1369465698":
+            record = Review(
+                name: "Yliopiston apteekki", point: Point(lat: 60.169575, lon: 24.939536),
+                address: "Mannerheimintie 5, Helsinki", hours: "08:00-24:00",
+                url: URL(string: "https://www.yliopistonapteekki.fi/yhteystiedot/helsinki-keskusta")!)
+        case "node/11771777459":
+            record = Review(
+                name: "Apteekki CityCenter", point: Point(lat: 60.170001, lon: 24.941615),
+                address: "Kaivokatu 8, Helsinki", hours: "Mo-Fr 08:00-19:00; Sa 10:00-17:00; Su off",
+                url: URL(string: "https://citycenter.fi/liikkeet/apteekki-citycenter/")!)
+        default:
+            return nil
+        }
+        return pharmacy.name == record.name && pharmacy.point.distance(to: record.point) <= 15 ? record : nil
+    }
+
+    private var displayAddress: String {
+        pharmacy.address.isEmpty ? reviewed?.address ?? "" : pharmacy.address
+    }
+
     private var isNearest: Bool { rank == 1 }
 
     private var name: String {
-        pharmacy.name.isEmpty ? String(localized: "Unnamed pharmacy") : pharmacy.name
+        pharmacy.name.isEmpty ? String(localized: "Pharmacy — name unavailable") : pharmacy.name
     }
 
     var body: some View {
@@ -26,6 +59,21 @@ struct PharmacyRow: View {
                     .accessibilityHidden(true)
                 details
                 Spacer(minLength: 0)
+            }
+            if let reviewed {
+                Link(destination: reviewed.url) {
+                    if pharmacy.hours == reviewed.hours {
+                        Text("Source checked: 26 November 2026")
+                    } else {
+                        Text("Pharmacy details")
+                    }
+                }
+                .font(.footnote)
+                .frame(minHeight: 44)
+            } else if pharmacy.hours.isEmpty {
+                Link("Check opening hours", destination: .pharmacyDirectory)
+                    .font(.footnote)
+                    .frame(minHeight: 44)
             }
             VStack(alignment: .leading, spacing: 6) {
                 Text(distance)
@@ -57,17 +105,31 @@ struct PharmacyRow: View {
             Text(name)
                 .font(isNearest ? .title3.weight(.semibold) : .headline)
                 .fixedSize(horizontal: false, vertical: true)
-            if !pharmacy.address.isEmpty {
-                Text(pharmacy.address)
+            if !displayAddress.isEmpty {
+                Text(displayAddress)
                     .font(.subheadline)
                     .foregroundStyle(palette.muted)
             }
+            if displayAddress.isEmpty && !pharmacy.name.isEmpty {
+                Text("Address not listed")
+                    .font(.footnote)
+                    .foregroundStyle(palette.muted)
+            }
+            if pharmacy.name.isEmpty {
+                Text(
+                    possibleDuplicate
+                        ? String(localized: "Possible duplicate map entry; identity not confirmed.")
+                        : String(localized: "Incomplete map entry; confirm the pharmacy before travelling.")
+                )
+                    .font(.footnote)
+                    .foregroundStyle(palette.muted)
+            }
             if pharmacy.hours.isEmpty {
-                Text("Hours not listed")
+                Text("Opening hours unavailable")
                     .font(.footnote)
                     .foregroundStyle(palette.muted)
             } else {
-                Text("Mapped hours (unverified)")
+                Text("Opening hours")
                     .font(.caption)
                     .foregroundStyle(palette.muted)
                 Text(readableHours)
