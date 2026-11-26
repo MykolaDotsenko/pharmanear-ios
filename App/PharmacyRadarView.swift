@@ -9,6 +9,7 @@ struct PharmacyRadarView: View {
     @StateObject private var location = RadarLocation()
     @State private var range = 200.0
     @State private var near = false
+    @State private var previousIdleTimer: Bool?
     @Environment(\.dismiss) private var dismiss
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.colorScheme) private var colorScheme
@@ -24,7 +25,11 @@ struct PharmacyRadarView: View {
 
     private var candidates: [Pharmacy] {
         guard let origin = location.point else { return Array(pharmacies.prefix(8)) }
-        let sorted = pharmacies.sorted { origin.distance(to: $0.point) < origin.distance(to: $1.point) }
+        let sorted = pharmacies.sorted {
+            let left = origin.distance(to: $0.point)
+            let right = origin.distance(to: $1.point)
+            return left == right ? $0.id < $1.id : left < right
+        }
         var result = Array(sorted.prefix(8))
         if !result.contains(where: { $0.id == target.id }) { result.append(target) }
         return result
@@ -66,12 +71,19 @@ struct PharmacyRadarView: View {
                             }
                         }
                     }
-                    Picker("Choose pharmacy", selection: Binding(get: { target.id }, set: { id in
-                        if let pharmacy = pharmacies.first(where: { $0.id == id }) { target = pharmacy }
-                    })) {
+                    Picker(
+                        "Choose pharmacy",
+                        selection: Binding(
+                            get: { target.id },
+                            set: { id in
+                                if let pharmacy = pharmacies.first(where: { $0.id == id }) { target = pharmacy }
+                            })
+                    ) {
                         ForEach(candidates) { pharmacy in
-                            Text(verbatim: pharmacy.name.isEmpty ? String(localized: "Unnamed pharmacy") : pharmacy.name)
-                                .tag(pharmacy.id)
+                            Text(
+                                verbatim: pharmacy.name.isEmpty ? String(localized: "Unnamed pharmacy") : pharmacy.name
+                            )
+                            .tag(pharmacy.id)
                         }
                     }
                     .pickerStyle(.menu)
@@ -95,18 +107,45 @@ struct PharmacyRadarView: View {
             }
         }
         .onAppear { if scenePhase == .active { location.start() } }
-        .onDisappear { location.stop(clear: true) }
+        .onDisappear {
+            location.stop(clear: true)
+            releaseScreen()
+        }
         .onChange(of: scenePhase) { phase in
-            if phase == .active { location.start() } else { location.stop() }
+            if phase == .active {
+                location.start()
+            } else {
+                location.stop()
+                releaseScreen()
+            }
         }
         .onChange(of: location.point) { _ in updateRange() }
         .onChange(of: location.accuracy) { _ in updateRange() }
-        .onChange(of: location.fresh) { _ in updateRange() }
+        .onChange(of: location.fresh) { fresh in
+            updateRange()
+            if fresh && scenePhase == .active {
+                holdScreen()
+            } else {
+                releaseScreen()
+            }
+        }
         .onChange(of: target) { _ in
             range = distance.map { RadarGeometry.range(distance: $0) } ?? 200
             near = false
             updateRange()
         }
+    }
+
+    private func holdScreen() {
+        guard previousIdleTimer == nil else { return }
+        previousIdleTimer = UIApplication.shared.isIdleTimerDisabled
+        UIApplication.shared.isIdleTimerDisabled = true
+    }
+
+    private func releaseScreen() {
+        guard let previousIdleTimer else { return }
+        UIApplication.shared.isIdleTimerDisabled = previousIdleTimer
+        self.previousIdleTimer = nil
     }
 
     @ViewBuilder
@@ -127,7 +166,8 @@ struct PharmacyRadarView: View {
     }
 
     private func formatted(_ meters: Double) -> String {
-        let value = meters < 1000
+        let value =
+            meters < 1000
             ? Measurement(value: meters, unit: UnitLength.meters)
             : Measurement(value: meters / 1000, unit: UnitLength.kilometers)
         return value.formatted(.measurement(width: .abbreviated, usage: .asProvided))
@@ -136,13 +176,18 @@ struct PharmacyRadarView: View {
     private func direction(_ bearing: Double) -> String {
         let angle = RadarGeometry.degrees(bearing - (location.heading ?? 0))
         let index = Int((angle / 45).rounded()) % 8
-        let labels = location.heading == nil
-            ? [String(localized: "North"), String(localized: "North-east"), String(localized: "East"),
+        let labels =
+            location.heading == nil
+            ? [
+                String(localized: "North"), String(localized: "North-east"), String(localized: "East"),
                 String(localized: "South-east"), String(localized: "South"), String(localized: "South-west"),
-                String(localized: "West"), String(localized: "North-west")]
-            : [String(localized: "Ahead"), String(localized: "Slightly right"), String(localized: "Right"),
+                String(localized: "West"), String(localized: "North-west"),
+            ]
+            : [
+                String(localized: "Ahead"), String(localized: "Slightly right"), String(localized: "Right"),
                 String(localized: "Behind right"), String(localized: "Behind"), String(localized: "Behind left"),
-                String(localized: "Left"), String(localized: "Slightly left")]
+                String(localized: "Left"), String(localized: "Slightly left"),
+            ]
         return labels[index]
     }
 
@@ -152,22 +197,32 @@ struct PharmacyRadarView: View {
             let center = CGPoint(x: size.width / 2, y: size.height / 2)
             let radius = side * 0.41
             func circle(_ center: CGPoint, _ radius: CGFloat) -> Path {
-                Path(ellipseIn: CGRect(x: center.x - radius, y: center.y - radius, width: 2 * radius, height: 2 * radius))
+                Path(
+                    ellipseIn: CGRect(x: center.x - radius, y: center.y - radius, width: 2 * radius, height: 2 * radius)
+                )
             }
             for ring in 1...4 {
-                context.stroke(circle(center, radius * CGFloat(ring) / 4), with: .color(.white.opacity(0.3)), lineWidth: 1)
+                context.stroke(
+                    circle(center, radius * CGFloat(ring) / 4), with: .color(.white.opacity(0.3)), lineWidth: 1)
             }
-            context.fill(circle(center, min(radius, radius * location.accuracy / range)), with: .color(.cyan.opacity(0.2)))
+            context.fill(
+                circle(center, min(radius, radius * location.accuracy / range)), with: .color(.cyan.opacity(0.2)))
             var drawn: [CGPoint] = []
             for pharmacy in [target] + candidates.filter({ $0.id != target.id }) {
                 let selected = pharmacy.id == target.id
                 let meters = origin.distance(to: pharmacy.point)
                 guard selected || meters <= range else { continue }
                 let b = RadarGeometry.bearing(from: origin, to: pharmacy.point)
-                let p = b.map { RadarGeometry.project(bearing: $0, heading: location.heading, distance: meters, range: range) }
+                let p = b.map {
+                    RadarGeometry.project(bearing: $0, heading: location.heading, distance: meters, range: range)
+                }
                 let mark = p.map { CGPoint(x: $0.lon * size.width, y: $0.lat * size.height) } ?? center
-                if !selected && (hypot(mark.x - center.x, mark.y - center.y) < 24 ||
-                    drawn.contains(where: { hypot(mark.x - $0.x, mark.y - $0.y) < 30 })) { continue }
+                if !selected
+                    && (hypot(mark.x - center.x, mark.y - center.y) < 24
+                        || drawn.contains(where: { hypot(mark.x - $0.x, mark.y - $0.y) < 30 }))
+                {
+                    continue
+                }
                 drawn.append(mark)
                 if selected && location.fresh && !near && hypot(mark.x - center.x, mark.y - center.y) > 18 {
                     var line = Path()
