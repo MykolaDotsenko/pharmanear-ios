@@ -87,7 +87,8 @@ catalog policy, transport, and the search lifecycle including cancellation and s
 XCUITest flows on an iPhone simulator (city search, result details, show more, the map sheet, the radar from a
 row, Finnish and Swedish, the largest text size, and Apple's accessibility audit). Screenshots from the UI tests are uploaded with every
 run, the largest text size among them; a manual run also captures the start screen in light, dark, Finnish and
-Swedish. [docs/review.md](docs/review.md) records what is verified and what still needs a person.
+Swedish, and with _log_screenshots_ prints a small contact sheet of them to the log, for reviewers who cannot
+download artifacts. [docs/review.md](docs/review.md) records what is verified and what still needs a person.
 
 ## Engineering process
 

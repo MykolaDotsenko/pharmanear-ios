@@ -33,6 +33,10 @@ struct PharmacyRadarView: View {
             }
             .background(palette.paper)
             .foregroundStyle(palette.ink)
+            // The sheet's own bar, styled like the main screen's: pine actions on paper keep their contrast.
+            .tint(palette.pine)
+            .toolbarBackground(palette.paper, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
             .navigationTitle("Pharmacy radar")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

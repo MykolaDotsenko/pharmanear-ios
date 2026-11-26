@@ -8,6 +8,7 @@ struct PharmacyMapSheet: View {
     let pharmacy: Pharmacy
 
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.colorScheme) private var colorScheme
     @State private var region: MKCoordinateRegion
 
     init(pharmacy: Pharmacy) {
@@ -17,6 +18,8 @@ struct PharmacyMapSheet: View {
                 center: pharmacy.coordinate,
                 span: MKCoordinateSpan(latitudeDelta: 0.018, longitudeDelta: 0.025)))
     }
+
+    private var palette: NordicPalette { NordicPalette(dark: colorScheme == .dark) }
 
     private var name: String {
         pharmacy.name.isEmpty ? String(localized: "Pharmacy — name unavailable") : pharmacy.name
@@ -39,6 +42,11 @@ struct PharmacyMapSheet: View {
                 }
             }
             .padding()
+            .background(palette.paper)
+            // Styled like the main screen's bar: pine actions on paper keep their contrast.
+            .tint(palette.pine)
+            .toolbarBackground(palette.paper, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
             .navigationTitle("Pharmacy map")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
