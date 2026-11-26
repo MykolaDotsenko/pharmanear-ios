@@ -12,12 +12,13 @@ with a third party. The web app already publishes a validated national extract e
 - **Bundle** the same `finland-pharmacies.json` (Geofabrik Finland extract, filtered to `amenity=pharmacy`,
   ODbL 1.0) as a resource of `PharmacyCore`, loaded through `Bundle.module`.
 - **Search it on the device.** The snapshot is decoded once per launch; every result within 30 km is ranked by
-  distance. Because the snapshot contains every mapped pharmacy, a result in range is proven nearest.
+  distance. The snapshot holds no pharmacies across the border, so a closer one can be missing near Sweden,
+  Norway or Russia: results make no coverage claim and say that only pharmacies mapped in Finland are included.
 - **Refresh without location.** When the snapshot in use is more than seven days old, the app downloads
   `https://pharmanear-web.vercel.app/data/current-finland-pharmacies.json` (4 s limit, ephemeral session, no
   cookies or cache). A newer valid snapshot replaces the bundled one in memory for the rest of the launch. After
   a failed attempt the app waits an hour before trying again, so an offline phone is not slowed down on every
-  search.
+  search; a download cut short by a cancelled search does not count as a failure.
 - **Expire.** A snapshot older than 30 days is never used.
 - **Fall back** to live Overpass (ADR 0001) only when no usable snapshot exists or it has nothing within 30 km.
 

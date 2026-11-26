@@ -40,8 +40,9 @@ Xcode 16 or later; the app runs on iOS 16 and later. There are no third-party de
 
 1. Open `PharmaNear.xcodeproj` and run the _PharmaNear_ scheme on an iPhone simulator.
 2. Use _Features › Location_ in the simulator to set a position, or search from a city centre.
-3. To see Finnish or Swedish, tap the globe button (it opens the app's page in Settings, where _Language_ is
-   available), or set _App Language_ in the scheme's Run options.
+3. To see Finnish or Swedish, set _App Language_ in the scheme's Run options. On a device or simulator with more
+   than one language under _Settings › General › Language & Region_, the globe button opens the app's own
+   _Language_ setting.
 
 ```sh
 swift test                                   # PharmacyCore tests (macOS or Linux)

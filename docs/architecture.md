@@ -6,7 +6,7 @@ UIKit, Core Location or MapKit.
 ## Boundaries
 
 ```
-App (SwiftUI, Core Location, MapKit)          PharmacyCore (Foundation only)
+App (SwiftUI, Core Location, MapKit)          PharmacyCore (Foundation; Combine where available)
   ContentView ──► SearchSession ◄──────────────  SearchSession, SearchPhase, LocationProviding
   DeviceLocation ─ implements LocationProviding   PharmacyCatalog ──► OverpassClient
   SearchHeader, ResultsSection, PharmacyRow       Core: Point, City, Pharmacy, ranking, coverage
@@ -44,9 +44,13 @@ Copy lives in [String Catalogs](https://developer.apple.com/documentation/xcode/
 extracts them from `Text`, `Button`, `Label` and `String(localized:)`. `scripts/check-strings.py` fails CI when
 a literal has no key, a key is unused, or a translation is missing or changes its format arguments.
 
-The app follows the system language. Since iOS 13 people can choose a language per app in Settings, so the
-globe button opens [the app's settings](https://developer.apple.com/documentation/uikit/uiapplication/opensettingsurlstring)
-instead of offering a second, in-app choice; see [ADR 0003](0003-system-language.md).
+The app follows the system language. Since iOS 13 people can choose a language per app in Settings once more
+than one language is set on the device; then the globe button opens
+[the app's settings](https://developer.apple.com/documentation/uikit/uiapplication/opensettingsurlstring)
+instead of offering a second, in-app choice. See [ADR 0003](0003-system-language.md).
+
+The checker matches interpolations by position, not type: a number needs a `%lld` key and a string a `%@` key,
+so the specifier of a new key with a number in it needs a look by eye.
 
 ## Accessibility
 

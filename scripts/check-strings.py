@@ -7,6 +7,10 @@ Fails when
 - a key lacks a translated English, Finnish or Swedish value, or a translation changes its format arguments.
 
 Xcode compiles a missing key silently and shows the English text, so this runs in CI.
+
+Limitation: Swift interpolations are matched by position, not type. `Text("\\(count) items")` needs the key
+"%lld items" while a String interpolation needs "%@"; this script treats both as one placeholder, so check
+the specifier when adding a key with a number in it.
 """
 
 import json
@@ -61,6 +65,9 @@ def check_catalog(path, errors):
     if catalog.get("sourceLanguage") != "en":
         errors.append(f"{path.name}: source language must be en")
     for key, entry in catalog["strings"].items():
+        # Marked as not translatable, or the app name Xcode copies from Info.plist when it syncs the catalog.
+        if entry.get("shouldTranslate") is False or key.startswith("CFBundle"):
+            continue
         expected = sorted(FORMAT_SPECIFIER.findall(key))
         for language in LANGUAGES:
             localization = entry.get("localizations", {}).get(language)
