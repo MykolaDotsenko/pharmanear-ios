@@ -54,7 +54,7 @@ struct PharmacyRadarView: View {
                         Text("Radar range: \(formatted(range))")
                             .font(.footnote)
                     }
-                    Text(verbatim: target.name.isEmpty ? String(localized: "Unnamed pharmacy") : target.name)
+                    Text(verbatim: target.name.isEmpty ? String(localized: "Pharmacy — name unavailable") : target.name)
                         .font(.title2.weight(.semibold))
                     Text(verbatim: target.address)
                     if let distance {
@@ -81,7 +81,7 @@ struct PharmacyRadarView: View {
                     ) {
                         ForEach(candidates) { pharmacy in
                             Text(
-                                verbatim: pharmacy.name.isEmpty ? String(localized: "Unnamed pharmacy") : pharmacy.name
+                                verbatim: pharmacy.name.isEmpty ? String(localized: "Pharmacy — name unavailable") : pharmacy.name
                             )
                             .tag(pharmacy.id)
                         }
