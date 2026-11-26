@@ -60,10 +60,11 @@ public enum PharmacyCatalog {
             let now = Date()
             var data = try? bundledData()
             let bundledDate = data.flatMap { try? metadata($0).1 }
-            if bundledDate == nil || now.timeIntervalSince(bundledDate!) > 7 * day {
+            let validSnapshot = data.flatMap { try? search($0, origin: origin, now: now) } != nil
+            if !validSnapshot || bundledDate.map({ now.timeIntervalSince($0) > 7 * day }) != false {
                 if let latest = try? await refresh(),
                    let latestDate = try? metadata(latest).1,
-                   (bundledDate == nil || latestDate > bundledDate!),
+                   (!validSnapshot || bundledDate.map({ latestDate > $0 }) != false),
                    (try? search(latest, origin: origin, now: now)) != nil {
                     data = latest
                 }
