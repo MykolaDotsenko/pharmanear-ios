@@ -9,12 +9,12 @@ final class RadarLocation: NSObject, ObservableObject {
     @Published private(set) var point: Point?
     @Published private(set) var accuracy: Double = 0
     @Published private(set) var heading: Double?
+    @Published private(set) var usesCompass = false
     @Published private(set) var fresh = false
     @Published private(set) var denied = false
     private var manager: CLLocationManager?
     private var compass: Double?
     private var motion: Double?
-    private var motionAt: Date?
     private var anchor: CLLocation?
     private var expiry: Task<Void, Never>?
     private var motionExpiry: Task<Void, Never>?
@@ -40,9 +40,9 @@ final class RadarLocation: NSObject, ObservableObject {
         motionExpiry?.cancel()
         fresh = false
         heading = nil
+        usesCompass = false
         compass = nil
         motion = nil
-        motionAt = nil
         anchor = nil
         if clear { point = nil }
     }
@@ -82,7 +82,6 @@ final class RadarLocation: NSObject, ObservableObject {
         }
         if let direction {
             motion = RadarGeometry.smooth(motion, direction)
-            motionAt = Date()
             motionExpiry?.cancel()
             motionExpiry = Task { [weak self] in
                 try? await Task.sleep(for: .seconds(15))
@@ -122,6 +121,7 @@ extension RadarLocation: CLLocationManagerDelegate {
         Task { @MainActor in
             guard self.manager === manager else { return }
             self.compass = RadarGeometry.smooth(self.compass, newHeading.trueHeading)
+            self.usesCompass = true
             self.heading = self.compass
         }
     }
