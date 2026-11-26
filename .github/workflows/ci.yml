@@ -15,6 +15,16 @@ jobs:
         run: python3 scripts/check-strings.py
       - name: Check Swift formatting
         run: xcrun swift-format lint --strict --recursive Package.swift Sources Tests App UITests
+      - name: Report canonical formatting for radar patch
+        if: failure()
+        run: |
+          xcrun swift-format format --in-place App/PharmacyRadarView.swift App/RadarLocation.swift App/ContentView.swift App/ResultsSection.swift Sources/PharmacyCore/RadarGeometry.swift Tests/PharmacyCoreTests/RadarGeometryTests.swift
+          python3 - <<'PY'
+          import json, pathlib, subprocess
+          for path in ["App/PharmacyRadarView.swift","App/RadarLocation.swift","App/ContentView.swift","App/ResultsSection.swift","Sources/PharmacyCore/RadarGeometry.swift","Tests/PharmacyCoreTests/RadarGeometryTests.swift"]:
+              if subprocess.run(['git','diff','--quiet','--',path]).returncode:
+                  print('RADAR_FORMAT '+json.dumps({'path':path,'content':pathlib.Path(path).read_text()},ensure_ascii=True))
+          PY
       - run: swift test
       - name: Choose an iPhone simulator
         run: |
