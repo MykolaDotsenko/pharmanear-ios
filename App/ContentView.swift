@@ -10,6 +10,7 @@ import UIKit
     @State private var selectedMap: Pharmacy?
     @State private var expanded = false
     @State private var privacyExpanded = false
+    @State private var resultDetailsExpanded = false
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.dynamicTypeSize) private var typeSize
@@ -17,11 +18,12 @@ import UIKit
     private func t(_ key: String) -> String { words[language]?[key] ?? extraWords[language]?[key] ?? uxWords[language]?[key] ?? words["en"]?[key] ?? extraWords["en"]?[key] ?? uxWords["en"]?[key] ?? key }
     var body: some View {
         NavigationStack {
+            ScrollViewReader { proxy in
             ScrollView {
-                VStack(alignment:.leading,spacing:24) {
+                VStack(alignment:.leading,spacing:finder.status == "found" ? 14 : 24) {
                     hero
                     if finder.status == "idle" { ContourArt(palette:palette) }
-                    results
+                    results.id("results")
                     VStack(alignment:.leading,spacing:8) {
                         Rectangle().fill(palette.line).frame(height:1).accessibilityHidden(true)
                         Text(t("disclaimer")).font(.footnote).foregroundStyle(palette.muted)
@@ -30,8 +32,15 @@ import UIKit
                     }
                 }
                 .frame(maxWidth:620)
-                .padding(.horizontal,20).padding(.vertical,24)
+                .padding(.horizontal,20).padding(.vertical,finder.status == "found" ? 14 : 24)
                 .frame(maxWidth:.infinity)
+            }
+            .onChange(of:finder.status) { value in
+                if value == "found" && !UIAccessibility.isVoiceOverRunning {
+                    if reduceMotion { proxy.scrollTo("results",anchor:.top) }
+                    else { withAnimation(.easeOut(duration:0.25)) { proxy.scrollTo("results",anchor:.top) } }
+                }
+            }
             }
             .background(palette.paper.ignoresSafeArea())
             .foregroundStyle(palette.ink)
@@ -141,8 +150,14 @@ import UIKit
                 }
             }
             if let result=finder.result, !result.pharmacies.isEmpty {
-                Text(t("distanceNote")).font(.footnote).foregroundStyle(palette.muted)
-                Text(t("mapPrivacy")).font(.caption).foregroundStyle(palette.muted)
+                DisclosureGroup(isExpanded:$resultDetailsExpanded) {
+                    VStack(alignment:.leading,spacing:6) {
+                        if let date = result.sourceDate { Text(t("catalogDate") + ": " + String(date.prefix(10))) }
+                        if !result.covered { Text(t("limited")) }
+                        Text(t("distanceNote"))
+                        Text(t("mapPrivacy"))
+                    }.font(.footnote).foregroundStyle(palette.muted)
+                } label: { Text(t("resultDetails")).font(.subheadline).foregroundStyle(palette.pine).frame(minHeight:44) }
                 LazyVStack(alignment:.leading,spacing:0) {
                     ForEach(Array(result.visiblePharmacies.prefix(expanded ? 20 : 5).enumerated()),id:\.element.id) { index,pharmacy in
                         pharmacyRow(pharmacy,index:index)
@@ -164,14 +179,18 @@ import UIKit
                 Text(String(format:"%02d",index+1)).font(.caption.monospacedDigit()).foregroundStyle(palette.muted).accessibilityHidden(true)
                 VStack(alignment:.leading,spacing:5) {
                     if index == 0 { Text(t("nearest")).font(.caption.weight(.semibold)).foregroundStyle(palette.pine) }
-                    Text(name).font(.headline).fixedSize(horizontal:false,vertical:true)
+                    Text(name).font(index == 0 ? .title3.weight(.semibold) : .headline).fixedSize(horizontal:false,vertical:true)
                     if !pharmacy.address.isEmpty { Text(pharmacy.address).font(.subheadline).foregroundStyle(palette.muted) }
-                    Text(pharmacy.hours.isEmpty ? t("missingHours") : t("hours")+": "+pharmacy.hours).font(.footnote).foregroundStyle(palette.muted)
+                    if pharmacy.hours.isEmpty { Text(t("missingHours")).font(.footnote).foregroundStyle(palette.muted) }
+                    else {
+                        Text(t("hours")).font(.caption).foregroundStyle(palette.muted)
+                        Text(pharmacy.hours.split(separator:";").map { $0.trimmingCharacters(in:.whitespaces) }.joined(separator:" · ")).font(.footnote).monospacedDigit()
+                    }
                 }
                 Spacer(minLength:0)
             }
             VStack(alignment:.leading,spacing:6) {
-                Text(formattedDistance(pharmacy.distance)).font(.title2.weight(.medium)).monospacedDigit()
+                Text(formattedDistance(pharmacy.distance)).font((index == 0 ? Font.title : Font.title2).weight(.medium)).monospacedDigit()
                 ViewThatFits(in:.horizontal) {
                     HStack(spacing:16) { mapPreview(pharmacy,name:name); externalMap(pharmacy,name:name) }
                     VStack(alignment:.leading,spacing:0) { mapPreview(pharmacy,name:name); externalMap(pharmacy,name:name) }
@@ -200,7 +219,7 @@ import UIKit
     }
     private var statusText: String {
         guard finder.status == "found",let result=finder.result else { return t(finder.status) }
-        return "\(t("found")): \(result.pharmacies.count) · \(finder.origin == "device" ? t("device") : finder.origin). \(result.covered ? "" : t("limited")) \(result.pharmacies.count > 20 ? t("shown") : "")"
+        return "\(result.pharmacies.count) \(t("resultCount")) · \(finder.origin == "device" ? t("device") : finder.origin)"
     }
     private func formattedDistance(_ meters:Double) -> String {
         let value=meters < 1000 ? Measurement(value:meters,unit:UnitLength.meters) : Measurement(value:meters/1000,unit:UnitLength.kilometers)
