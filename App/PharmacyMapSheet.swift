@@ -19,7 +19,7 @@ struct PharmacyMapSheet: View {
     }
 
     private var name: String {
-        pharmacy.name.isEmpty ? String(localized: "Unnamed pharmacy") : pharmacy.name
+        pharmacy.name.isEmpty ? String(localized: "Pharmacy — name unavailable") : pharmacy.name
     }
 
     var body: some View {
