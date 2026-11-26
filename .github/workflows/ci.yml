@@ -1,13 +1,5 @@
 name: iOS CI
-on:
-  push:
-  pull_request:
-  workflow_dispatch:
-    inputs:
-      log_screenshots:
-        description: Also print a small contact sheet of the screenshots to the log, as base64 JPEG
-        type: boolean
-        default: false
+on: [push, pull_request, workflow_dispatch]
 concurrency:
   group: ios-ci-${{ github.ref }}
   cancel-in-progress: true
@@ -85,13 +77,3 @@ jobs:
           name: ios-ui-evidence
           path: ui-evidence/
           if-no-files-found: warn
-      - name: Print a contact sheet of the screenshots
-        if: always() && inputs.log_screenshots
-        continue-on-error: true
-        run: |
-          python3 -m venv "$RUNNER_TEMP/sheet"
-          "$RUNNER_TEMP/sheet/bin/pip" install --quiet pillow==11.3.0
-          "$RUNNER_TEMP/sheet/bin/python" scripts/contact-sheet.py ui-test-screenshots ui-evidence "$RUNNER_TEMP/sheet.jpg"
-          echo "BEGIN CONTACT SHEET"
-          base64 -i "$RUNNER_TEMP/sheet.jpg" | fold -w 3000
-          echo "END CONTACT SHEET"

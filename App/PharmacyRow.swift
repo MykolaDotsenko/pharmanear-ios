@@ -120,12 +120,12 @@ struct PharmacyRow: View {
                     .foregroundStyle(palette.muted)
                     .fixedSize(horizontal: false, vertical: true)
             } else {
-                // Mapped hours are unverified; only hours matching a recent check drop the qualifier.
+                // Mapped hours name their source, OpenStreetMap; hours matching a recent check need no source here.
                 Group {
                     if source?.checked != nil {
                         Text("Opening hours")
                     } else {
-                        Text("Mapped hours (unverified)")
+                        Text("Opening hours (OpenStreetMap)")
                     }
                 }
                 .font(.caption)

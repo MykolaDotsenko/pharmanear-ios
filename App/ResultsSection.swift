@@ -38,8 +38,8 @@ struct ResultsSection: View {
             if let result = snapshot.result, !result.pharmacies.isEmpty {
                 details(for: result)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Opening hours come from OpenStreetMap and are unverified unless a checked source is shown.")
-                    Text("Confirm before travelling.")
+                    Text("Opening hours come from OpenStreetMap and can be out of date.")
+                    Text("Confirm them with the pharmacy before you go.")
                 }
                 .font(.footnote)
                 .foregroundStyle(palette.muted)

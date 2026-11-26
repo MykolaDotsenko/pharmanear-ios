@@ -305,28 +305,6 @@
         }
       }
     },
-    "Choose pharmacy" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Choose pharmacy"
-          }
-        },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Valitse apteekki"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Välj apotek"
-          }
-        }
-      }
-    },
     "Choose your location to start." : {
       "localizations" : {
         "en" : {
@@ -460,25 +438,25 @@
         }
       }
     },
-    "Confirm before travelling." : {
-      "comment" : "Second sentence of the notice above the results.",
+    "Confirm them with the pharmacy before you go." : {
+      "comment" : "Second sentence of the notice above the results: confirm the opening hours.",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Confirm before travelling."
+            "value" : "Confirm them with the pharmacy before you go."
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tarkista ennen lähtöä."
+            "value" : "Varmista ne apteekista ennen lähtöä."
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kontrollera före avfärd."
+            "value" : "Kontrollera dem med apoteket innan du går."
           }
         }
       }
@@ -951,25 +929,25 @@
         }
       }
     },
-    "Mapped hours (unverified)" : {
-      "comment" : "Label above a pharmacy's opening hours taken from OpenStreetMap; they are not verified.",
+    "Opening hours (OpenStreetMap)" : {
+      "comment" : "Label above a pharmacy's opening hours, naming where they come from.",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mapped hours (unverified)"
+            "value" : "Opening hours (OpenStreetMap)"
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Karttaan merkityt aukioloajat (vahvistamatta)"
+            "value" : "Aukioloajat (OpenStreetMap)"
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kartlagda öppettider (ej bekräftade)"
+            "value" : "Öppettider (OpenStreetMap)"
           }
         }
       }
@@ -1266,25 +1244,25 @@
         }
       }
     },
-    "Opening hours come from OpenStreetMap and are unverified unless a checked source is shown." : {
-      "comment" : "Notice above the results.",
+    "Opening hours come from OpenStreetMap and can be out of date." : {
+      "comment" : "First sentence of the notice above the results about where opening hours come from.",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Opening hours come from OpenStreetMap and are unverified unless a checked source is shown."
+            "value" : "Opening hours come from OpenStreetMap and can be out of date."
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aukioloajat ovat OpenStreetMapista eikä niitä ole vahvistettu, ellei tarkistettua lähdettä ole merkitty."
+            "value" : "Aukioloajat tulevat OpenStreetMapista ja voivat olla vanhentuneita."
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Öppettiderna kommer från OpenStreetMap och är inte bekräftade om ingen kontrollerad källa anges."
+            "value" : "Öppettiderna kommer från OpenStreetMap och kan vara inaktuella."
           }
         }
       }

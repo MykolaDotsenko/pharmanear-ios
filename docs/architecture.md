@@ -36,10 +36,12 @@ App (SwiftUI, Core Location, MapKit)          PharmacyCore (Foundation; Combine 
   serializes refresh decisions without locks. Download, live search and the clock are injected for tests.
 - **`CheckedSources`** holds manually checked pages for a few pharmacies. A check applies only while the
   mapped name, position and hours still match it, and vouches for the hours for ninety days; after that the row
-  keeps only the link. Mapped hours are otherwise labelled unverified.
-- **The radar** opens from a _Radar_ button on each row, pointing to that pharmacy, with the other results as
-  context and a menu to switch. It keeps its rules in `PharmacyCore`, tested on Linux, and only the sensors in
-  the app.
+  keeps only the link. Other hours name their source, _Opening hours (OpenStreetMap)_, and the notice above
+  the results says they can be out of date.
+- **The radar** opens from a _Radar_ button on each row and starts at once. It shows only that pharmacy: the
+  distance and the way to turn come first, large, then the dial, which is drawn while the first fix is awaited
+  so nothing jumps when it arrives. It keeps its rules in `PharmacyCore`, tested on Linux, and only the
+  sensors in the app.
   `RadarTracker` decides which fixes count (none older than 15 s, none invalid), when a fix is stale (read at
   the moment, so no timers), and what turns the chart: the compass while it is better than ±30°, used as
   delivered so it never lags after a turn; otherwise the direction of travel; otherwise north-up.

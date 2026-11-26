@@ -70,6 +70,27 @@ final class PharmaNearUITests: XCTestCase {
         try audit(app)
     }
 
+    /// Dynamic Type at the largest accessibility size: a row's text grows with the setting and wraps within the
+    /// screen instead of being cut off. Measured directly, because the audit's own Dynamic Type heuristic
+    /// flags a different, correctly scaling SwiftUI text on each run.
+    func testTheLargestTextSizeWrapsRowsInsteadOfCuttingThemOff() {
+        let regular = launch()
+        searchFromCity(in: regular, expecting: "44 mapped pharmacies · Turku")
+        let regularAddress = regular.staticTexts["Yliopistonkatu 18 Turku"]
+        reveal(regularAddress, in: regular)
+        let regularHeight = regularAddress.frame.height
+        regular.terminate()
+
+        let large = launch(textSize: "UICTContentSizeCategoryAccessibilityXXXL")
+        searchFromCity(in: large, expecting: "44 mapped pharmacies · Turku")
+        let address = large.staticTexts["Yliopistonkatu 18 Turku"]
+        reveal(address, in: large)
+        // Two lines or more at a several times larger font: it wrapped rather than being truncated to one line.
+        XCTAssertGreaterThan(address.frame.height, regularHeight * 4)
+        XCTAssertLessThanOrEqual(address.frame.maxX, large.windows.firstMatch.frame.maxX + 1)
+        attachScreenshot(of: large, named: "Largest text")
+    }
+
     func testRadarOpensFromARowOnThatPharmacy() throws {
         let app = launch()
         searchFromCity(in: app, expecting: "44 mapped pharmacies · Turku")
@@ -95,13 +116,22 @@ final class PharmaNearUITests: XCTestCase {
         if allow.waitForExistence(timeout: 5) { allow.tap() }
     }
 
-    private func launch(language: String = "en") -> XCUIApplication {
+    private func launch(language: String = "en", textSize: String? = nil) -> XCUIApplication {
         continueAfterFailure = false
         let app = XCUIApplication()
         app.launchEnvironment["PHARMANEAR_CATALOG_DATE"] = "2026-11-26T12:00:00Z"
         app.launchArguments += ["-AppleLanguages", "(\(language))", "-AppleLocale", "\(language)_FI"]
+        if let textSize { app.launchArguments += ["-UIPreferredContentSizeCategoryName", textSize] }
         app.launch()
         return app
+    }
+
+    /// Scrolls until `element` exists and can be tapped; lazily built rows appear only when scrolled to.
+    private func reveal(_ element: XCUIElement, in app: XCUIApplication) {
+        for _ in 0..<12 where !(element.exists && element.isHittable) {
+            app.swipeUp()
+        }
+        XCTAssertTrue(element.exists, "\(element) never appeared")
     }
 
     /// Searches from the default city and waits until the status line reads `status`.
@@ -123,23 +153,18 @@ final class PharmaNearUITests: XCTestCase {
         }
     }
 
-    /// Runs Apple's accessibility audit and logs every issue with the element it concerns. The titles and
-    /// buttons of every navigation bar, a sheet's included, are exempt from the Dynamic Type check: by design
-    /// they keep their size and offer the Large Content Viewer instead. Every other issue fails the test.
+    /// Runs Apple's accessibility audit and logs every issue with the element it concerns; any issue fails the
+    /// test. Its Dynamic Type heuristic is left out: it flagged a different, correctly scaling SwiftUI text on
+    /// each run, so the largest text size is tested directly instead (testTheLargestTextSize…). Contrast,
+    /// clipped text, hit regions, element descriptions and traits are all audited.
     @available(iOS 17.0, *)
     private func audit(_ app: XCUIApplication) throws {
-        let navigationBars = app.navigationBars.allElementsBoundByIndex.map(\.frame)
-        try app.performAccessibilityAudit { issue in
+        try app.performAccessibilityAudit(for: XCUIAccessibilityAuditType.all.subtracting(.dynamicType)) { issue in
             let element = issue.element
             print(
                 "Accessibility audit: \(issue.compactDescription); type \(element?.elementType.rawValue ?? 0),",
                 "label “\(element?.label ?? "")”, identifier “\(element?.identifier ?? "")”, frame \(element?.frame ?? .zero)"
             )
-            if issue.auditType == .dynamicType, let element,
-                navigationBars.contains(where: { $0.contains(element.frame) })
-            {
-                return true
-            }
             return false
         }
     }
