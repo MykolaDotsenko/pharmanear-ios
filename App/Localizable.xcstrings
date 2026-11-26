@@ -83,6 +83,28 @@
         }
       }
     },
+    "Address not listed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Address not listed"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Osoitetta ei ilmoitettu"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adress saknas"
+          }
+        }
+      }
+    },
     "Ahead" : {
       "localizations" : {
         "en" : {
@@ -234,6 +256,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kontrollera apoteksuppgifter på Apteekki.fi"
+          }
+        }
+      }
+    },
+    "Check opening hours" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Check opening hours"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tarkista aukioloajat"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kontrollera öppettider"
           }
         }
       }
@@ -614,24 +658,24 @@
         }
       }
     },
-    "Hours not listed" : {
+    "Incomplete map entry; confirm the pharmacy before travelling." : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hours not listed"
+            "value" : "Incomplete map entry; confirm the pharmacy before travelling."
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aukioloaikoja ei ilmoitettu"
+            "value" : "Puutteellinen karttamerkintä; varmista apteekki ennen lähtöä."
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Öppettider saknas"
+            "value" : "Ofullständig kartpost; bekräfta apoteket före avfärd."
           }
         }
       }
@@ -861,28 +905,6 @@
         }
       }
     },
-    "Mapped hours (unverified)" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mapped hours (unverified)"
-          }
-        },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Karttaan merkityt aukioloajat (vahvistamatta)"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kartlagda öppettider (ej bekräftade)"
-          }
-        }
-      }
-    },
     "Near the mapped pharmacy. Look for its entrance." : {
       "localizations" : {
         "en" : {
@@ -1107,6 +1129,72 @@
         }
       }
     },
+    "Opening hours" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opening hours"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aukioloajat"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öppettider"
+          }
+        }
+      }
+    },
+    "Opening hours are from OpenStreetMap unless a checked source is shown. Confirm before travelling." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opening hours are from OpenStreetMap unless a checked source is shown. Confirm before travelling."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aukioloajat ovat OpenStreetMapista, ellei tarkistettua lähdettä ole merkitty. Tarkista ne ennen lähtöä."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öppettider kommer från OpenStreetMap om ingen kontrollerad källa anges. Kontrollera dem före avfärd."
+          }
+        }
+      }
+    },
+    "Opening hours unavailable" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opening hours unavailable"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aukioloajat eivät ole tiedossa"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öppettider är inte tillgängliga"
+          }
+        }
+      }
+    },
     "Opens Settings, where you can choose the app's language." : {
       "comment" : "Accessibility hint of the Language button.",
       "localizations" : {
@@ -1176,6 +1264,50 @@
         }
       }
     },
+    "Pharmacy — name unavailable" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pharmacy — name unavailable"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apteekki — nimi puuttuu"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apotek — namn saknas"
+          }
+        }
+      }
+    },
+    "Pharmacy details" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pharmacy details"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apteekin tiedot"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apoteksuppgifter"
+          }
+        }
+      }
+    },
     "Pharmacy finder" : {
       "comment" : "Eyebrow above the heading; shown in uppercase.",
       "localizations" : {
@@ -1240,6 +1372,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Apoteksradar"
+          }
+        }
+      }
+    },
+    "Possible duplicate map entry; identity not confirmed." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Possible duplicate map entry; identity not confirmed."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mahdollinen päällekkäinen karttamerkintä; apteekkia ei ole varmistettu."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Möjlig dubblett i kartan; identiteten är inte bekräftad."
           }
         }
       }
@@ -1509,6 +1663,28 @@
         }
       }
     },
+    "Source checked: 26 November 2026" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Source checked: 26 November 2026"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lähde tarkistettu 26.11.2026"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Källa kontrollerad 26 november 2026"
+          }
+        }
+      }
+    },
     "South" : {
       "localizations" : {
         "en" : {
@@ -1705,29 +1881,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Åbo"
-          }
-        }
-      }
-    },
-    "Unnamed pharmacy" : {
-      "comment" : "Shown when a mapped pharmacy has no name.",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Unnamed pharmacy"
-          }
-        },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nimetön apteekki"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Namnlöst apotek"
           }
         }
       }
