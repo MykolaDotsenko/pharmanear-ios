@@ -15,7 +15,8 @@ affiliated with Treat Health and not medical advice. The web version is
   _Open in Maps_ on request.
 - Shows community-mapped opening hours labelled as unverified; a few pharmacies whose hours were checked against
   their own page show that date for ninety days. Rows without hours link to Apteekki.fi.
-- An optional pharmacy radar points to a chosen result in a straight line from live GPS and the compass. It
+- A _Radar_ button on every result opens a radar that points to that pharmacy in a straight line, from live GPS
+  and the compass. It
   asks for location when opened if _Use my location_ has not, gives no direction while the pharmacy is within
   the GPS uncertainty, keeps "near" at the door, works in landscape, and stops in the background. Nothing it
   reads is stored or sent.

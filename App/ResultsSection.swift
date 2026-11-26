@@ -8,7 +8,8 @@ struct ResultsSection: View {
     let cancel: () -> Void
     let retry: () -> Void
     let showMap: (Pharmacy) -> Void
-    let showRadar: ([Pharmacy]) -> Void
+    /// Opens the radar on one pharmacy, with the other results around it.
+    let showRadar: (Pharmacy, [Pharmacy]) -> Void
 
     @State private var showsAll = false
     @State private var showsDetails = false
@@ -36,9 +37,6 @@ struct ResultsSection: View {
             }
             if let result = snapshot.result, !result.pharmacies.isEmpty {
                 details(for: result)
-                Button("Pharmacy radar") { showRadar(result.pharmacies) }
-                    .buttonStyle(NordicButton(palette: palette, primary: false))
-                    .accessibilityIdentifier("open-radar")
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Opening hours come from OpenStreetMap and are unverified unless a checked source is shown.")
                     Text("Confirm before travelling.")
@@ -119,8 +117,9 @@ struct ResultsSection: View {
             ForEach(Array(shown.enumerated()), id: \.element.id) { index, pharmacy in
                 PharmacyRow(
                     pharmacy: pharmacy, rank: index + 1, palette: palette,
-                    possibleDuplicate: isPossibleDuplicate(pharmacy, in: result.pharmacies)
-                ) { showMap(pharmacy) }
+                    possibleDuplicate: isPossibleDuplicate(pharmacy, in: result.pharmacies),
+                    showMap: { showMap(pharmacy) },
+                    showRadar: { showRadar(pharmacy, result.pharmacies) })
             }
         }
         if result.pharmacies.count > Self.initialCount {

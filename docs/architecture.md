@@ -37,7 +37,9 @@ App (SwiftUI, Core Location, MapKit)          PharmacyCore (Foundation; Combine 
 - **`CheckedSources`** holds manually checked pages for a few pharmacies. A check applies only while the
   mapped name, position and hours still match it, and vouches for the hours for ninety days; after that the row
   keeps only the link. Mapped hours are otherwise labelled unverified.
-- **The radar** keeps its rules in `PharmacyCore`, tested on Linux, and only the sensors in the app.
+- **The radar** opens from a _Radar_ button on each row, pointing to that pharmacy, with the other results as
+  context and a menu to switch. It keeps its rules in `PharmacyCore`, tested on Linux, and only the sensors in
+  the app.
   `RadarTracker` decides which fixes count (none older than 15 s, none invalid), when a fix is stale (read at
   the moment, so no timers), and what turns the chart: the compass while it is better than ±30°, used as
   delivered so it never lags after a turn; otherwise the direction of travel; otherwise north-up.
@@ -49,6 +51,8 @@ App (SwiftUI, Core Location, MapKit)          PharmacyCore (Foundation; Combine 
   final and a heading failure as a fall-back to north-up, and reports approximate location. The radar stops
   only in the background, since the permission prompt makes the app inactive; it keeps the screen on while a
   fix is live and restores the idle timer afterwards. With Reduce Motion the chart stays north-up.
+- **Row actions** sit in a small wrapping layout: on one line when they fit and on more when the width or text
+  size needs it, so each action keeps its identity and VoiceOver focus when Dynamic Type changes.
 - **Views** receive values and closures, not the session: `SearchHeader` needs only whether the app is idle and
   two actions; `ResultsSection` renders a snapshot. There is no global store, service locator or persistence of
   coordinates.

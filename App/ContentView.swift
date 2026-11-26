@@ -31,10 +31,8 @@ struct ContentView: View {
                             snapshot: search.snapshot, palette: palette,
                             cancel: { search.cancel() }, retry: { search.retry() },
                             showMap: { mappedPharmacy = $0 },
-                            showRadar: { pharmacies in
-                                if let target = pharmacies.first {
-                                    radar = RadarRequest(pharmacies: pharmacies, target: target)
-                                }
+                            showRadar: { target, pharmacies in
+                                radar = RadarRequest(pharmacies: pharmacies, target: target)
                             }
                         )
                         .id(Self.resultsID)

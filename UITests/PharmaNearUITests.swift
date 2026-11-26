@@ -70,7 +70,30 @@ final class PharmaNearUITests: XCTestCase {
         try audit(app)
     }
 
+    func testRadarOpensFromARowOnThatPharmacy() throws {
+        let app = launch()
+        searchFromCity(in: app, expecting: "44 mapped pharmacies · Turku")
+        let radar = app.buttons["Radar: Yliopiston Apteekki"]
+        scrollIntoView(radar, in: app)
+        radar.tap()
+        allowLocationIfAsked()
+        XCTAssertTrue(app.navigationBars["Pharmacy radar"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Yliopiston Apteekki"].exists)
+        // CI places the simulator in central Turku, so the radar gets live fixes.
+        XCTAssertTrue(app.staticTexts["Live GPS"].waitForExistence(timeout: 20))
+        attachScreenshot(of: app, named: "Radar")
+        if #available(iOS 17.0, *) { try audit(app) }
+        app.buttons["Close radar"].tap()
+        XCTAssertTrue(disappears(app.navigationBars["Pharmacy radar"]))
+    }
+
     // MARK: Helpers
+
+    /// Answers the system location prompt when the radar is the first to ask.
+    private func allowLocationIfAsked() {
+        let allow = XCUIApplication(bundleIdentifier: "com.apple.springboard").buttons["Allow While Using App"]
+        if allow.waitForExistence(timeout: 5) { allow.tap() }
+    }
 
     private func launch(language: String = "en") -> XCUIApplication {
         continueAfterFailure = false

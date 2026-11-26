@@ -9,8 +9,7 @@ struct PharmacyRow: View {
     let palette: NordicPalette
     let possibleDuplicate: Bool
     let showMap: () -> Void
-
-    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    let showRadar: () -> Void
 
     /// A hand-checked source, which vouches for the hours only while they match and the check is recent.
     private var source: CheckedSource? { CheckedSources.source(for: pharmacy) }
@@ -35,9 +34,11 @@ struct PharmacyRow: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(alignment: .top, spacing: 12) {
+                // Never compressed by a long name beside it, so the number is never cut off at large text sizes.
                 Text(rank, format: .number.precision(.integerLength(2)))
                     .font(.caption.monospacedDigit())
                     .foregroundStyle(palette.muted)
+                    .fixedSize()
                     .accessibilityHidden(true)
                 details
                 Spacer(minLength: 0)
@@ -63,7 +64,7 @@ struct PharmacyRow: View {
                 Text(distance)
                     .font((isNearest ? Font.title : Font.title2).weight(.medium))
                     .monospacedDigit()
-                actionLayout { actions }
+                ActionFlow(spacing: 16) { actions }
             }
         }
         .padding(14)
@@ -138,15 +139,6 @@ struct PharmacyRow: View {
         .accessibilityElement(children: .combine)
     }
 
-    // Preserve the identity of each action when Dynamic Type changes, and give larger labels room to wrap.
-    private var actionLayout: AnyLayout {
-        if dynamicTypeSize >= .xxxLarge {
-            AnyLayout(VStackLayout(alignment: .leading, spacing: 0))
-        } else {
-            AnyLayout(HStackLayout(spacing: 16))
-        }
-    }
-
     @ViewBuilder
     private var actions: some View {
         Button(action: showMap) {
@@ -158,6 +150,15 @@ struct PharmacyRow: View {
         .accessibilityLabel(Text("Map preview: \(name)"))
         .accessibilityIdentifier("map-preview-\(pharmacy.id)")
         .accessibilityHint(Text("MapKit loads this pharmacy location; Apple receives network metadata."))
+
+        Button(action: showRadar) {
+            Label("Radar", systemImage: "location.north.line")
+                .font(.subheadline.weight(.semibold))
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(minHeight: 44)
+        }
+        .accessibilityLabel(Text("Radar: \(name)"))
+        .accessibilityIdentifier("radar-\(pharmacy.id)")
 
         Button(action: openInMaps) {
             Label("Open in Maps", systemImage: "arrow.up.right")
@@ -194,5 +195,57 @@ struct PharmacyRow: View {
         let item = MKMapItem(placemark: MKPlacemark(coordinate: pharmacy.coordinate))
         item.name = name
         item.openInMaps(launchOptions: nil)
+    }
+}
+
+/// Lays the row's actions out in a line and wraps to the next one when they do not fit, at any text size and
+/// width, keeping each action's identity (and VoiceOver focus) when the text size changes.
+private struct ActionFlow: Layout {
+    var spacing: CGFloat
+
+    private struct Item {
+        let index: Int
+        let size: CGSize
+    }
+
+    private func arrange(_ subviews: Subviews, width: CGFloat) -> [[Item]] {
+        var lines: [[Item]] = [[]]
+        var x: CGFloat = 0
+        for (index, subview) in subviews.enumerated() {
+            let ideal = subview.sizeThatFits(.unspecified)
+            // A label wider than the whole row wraps inside its own width instead.
+            let size = ideal.width > width ? subview.sizeThatFits(ProposedViewSize(width: width, height: nil)) : ideal
+            if let last = lines.indices.last, !lines[last].isEmpty, x + size.width > width {
+                lines.append([])
+                x = 0
+            }
+            lines[lines.count - 1].append(Item(index: index, size: size))
+            x += size.width + spacing
+        }
+        return lines
+    }
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let lines = arrange(subviews, width: proposal.width ?? .infinity)
+        let height = lines.reduce(0) { total, line in total + (line.map { $0.size.height }.max() ?? 0) }
+        let width =
+            lines.map { line in
+                line.reduce(0) { $0 + $1.size.width } + spacing * CGFloat(max(0, line.count - 1))
+            }.max() ?? 0
+        return CGSize(width: proposal.width ?? width, height: height)
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        var y = bounds.minY
+        for line in arrange(subviews, width: bounds.width) {
+            let height = line.map { $0.size.height }.max() ?? 0
+            var x = bounds.minX
+            for item in line {
+                subviews[item.index].place(
+                    at: CGPoint(x: x, y: y + (height - item.size.height) / 2), proposal: ProposedViewSize(item.size))
+                x += item.size.width + spacing
+            }
+            y += height
+        }
     }
 }

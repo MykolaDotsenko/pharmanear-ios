@@ -1560,6 +1560,29 @@
         }
       }
     },
+    "Radar" : {
+      "comment" : "Button on a pharmacy row that opens the radar pointing to it.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Radar"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tutka"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Radar"
+          }
+        }
+      }
+    },
     "Radar range: %@" : {
       "localizations" : {
         "en" : {
@@ -1578,6 +1601,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Radarns räckvidd: %@"
+          }
+        }
+      }
+    },
+    "Radar: %@" : {
+      "comment" : "VoiceOver name of a row's radar button; %@ is the pharmacy's name.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Radar: %@"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tutka: %@"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Radar: %@"
           }
         }
       }
