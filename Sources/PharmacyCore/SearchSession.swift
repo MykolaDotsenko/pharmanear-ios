@@ -54,8 +54,6 @@ public final class SearchSession {
         public private(set) var snapshot = SearchSnapshot.idle
     #endif
 
-    public var canRetry: Bool { lastOrigin != nil }
-
     private let lookup: @Sendable (Point) async throws -> SearchResult
     private let location: any LocationProviding
     private var task: Task<Void, Never>?

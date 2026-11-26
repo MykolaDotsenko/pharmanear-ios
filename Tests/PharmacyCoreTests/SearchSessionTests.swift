@@ -100,14 +100,12 @@ final class SearchSessionTests: XCTestCase {
     func testRetryRepeatsTheLastSearch() async {
         let lookups = PendingLookups()
         let session = SearchSession(location: FixedLocation(.failure(LocationUnavailable())), lookup: lookups.lookup)
-        XCTAssertFalse(session.canRetry)
 
         session.search(from: .vaasa)
         await lookups.waitForCalls(1)
         lookups.resolve(0, with: .failure(URLError(.notConnectedToInternet)))
         await settle()
         XCTAssertEqual(session.snapshot.phase, .failed)
-        XCTAssertTrue(session.canRetry)
 
         session.retry()
         await lookups.waitForCalls(2)

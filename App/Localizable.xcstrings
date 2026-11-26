@@ -665,6 +665,29 @@
         }
       }
     },
+    "Only pharmacies mapped in Finland are included." : {
+      "comment" : "Shown with catalog results: pharmacies across the border are not in the catalog.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Only pharmacies mapped in Finland are included."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mukana ovat vain Suomessa kartoitetut apteekit."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Endast apotek som kartlagts i Finland ingår."
+          }
+        }
+      }
+    },
     "Open in Maps" : {
       "comment" : "Opens the pharmacy in Apple Maps.",
       "localizations" : {

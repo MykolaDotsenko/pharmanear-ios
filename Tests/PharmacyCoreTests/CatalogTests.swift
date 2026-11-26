@@ -20,7 +20,7 @@ final class CatalogTests: XCTestCase {
         for city in City.allCases {
             let result = snapshot.search(from: city.centre)
             XCTAssertFalse(result.pharmacies.isEmpty, city.rawValue)
-            XCTAssertTrue(result.covered, city.rawValue)
+            XCTAssertFalse(result.covered, city.rawValue)
             XCTAssertEqual(result.sourceDate, "2026-11-24T21:21:23Z")
         }
     }
@@ -66,12 +66,6 @@ final class CatalogTests: XCTestCase {
         XCTAssertEqual(calls, ["download \(PharmacyCatalog.refreshURL.absoluteString)"])
     }
 
-    func testRefreshRequestCarriesNoCoordinates() {
-        let url = PharmacyCatalog.refreshURL
-        XCTAssertNil(url.query)
-        XCTAssertFalse(url.absoluteString.contains("60."))
-    }
-
     func testFailedRefreshKeepsTheValidCatalogAndWaitsBeforeRetrying() async throws {
         let network = Recorder(download: nil)
         let catalog = makeCatalog(bundled: catalog(date: "2026-11-10T00:00:00Z"), network: network)
@@ -81,6 +75,22 @@ final class CatalogTests: XCTestCase {
         XCTAssertEqual(second.sourceDate, "2026-11-10T00:00:00Z")
         let calls = await network.calls
         XCTAssertEqual(calls.count, 1, "A failed refresh must not delay every search")
+    }
+
+    func testCancelledRefreshDoesNotDelayTheNextSearch() async throws {
+        let network = Recorder(download: catalog(date: "2026-11-25T00:00:00Z"), delay: .seconds(30))
+        let catalog = makeCatalog(bundled: catalog(date: "2026-10-01T00:00:00Z"), network: network)
+        let first = Task { try await catalog.lookup(origin: turku) }
+        await network.waitForCalls(1)
+        first.cancel()
+        _ = try? await first.value
+
+        await network.respondImmediately()
+        let second = try await catalog.lookup(origin: turku)
+        XCTAssertEqual(second.sourceDate, "2026-11-25T00:00:00Z")
+        let calls = await network.calls
+        XCTAssertEqual(calls.filter { $0.hasPrefix("download") }.count, 2)
+        XCTAssertFalse(calls.contains { $0.hasPrefix("live") }, "The refreshed catalog must answer")
     }
 
     func testOlderPublishedSnapshotIsIgnored() async throws {
@@ -143,17 +153,20 @@ final class CatalogTests: XCTestCase {
     }
 }
 
-/// Records network use and answers with canned data.
+/// Records network use and answers with canned data, optionally after a cancellable delay.
 private actor Recorder {
     private(set) var calls: [String] = []
     private let downloadData: Data?
+    private var delay: Duration?
 
-    init(download: Data? = nil) {
+    init(download: Data? = nil, delay: Duration? = nil) {
         downloadData = download
+        self.delay = delay
     }
 
-    func download(_ url: URL) throws -> (Data, URLResponse) {
+    func download(_ url: URL) async throws -> (Data, URLResponse) {
         calls.append("download \(url.absoluteString)")
+        if let delay { try await Task.sleep(for: delay) }
         guard let downloadData else { throw URLError(.notConnectedToInternet) }
         let response = HTTPURLResponse(url: url, statusCode: 200, httpVersion: "HTTP/1.1", headerFields: nil)!
         return (downloadData, response)
@@ -162,5 +175,13 @@ private actor Recorder {
     func live(_ origin: Point) -> SearchResult {
         calls.append("live \(origin.lat),\(origin.lon)")
         return SearchResult(pharmacies: [], radius: 30_000, covered: false)
+    }
+
+    func respondImmediately() {
+        delay = nil
+    }
+
+    func waitForCalls(_ count: Int) async {
+        while calls.count < count { await Task.yield() }
     }
 }

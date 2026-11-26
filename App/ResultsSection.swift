@@ -4,7 +4,6 @@ import SwiftUI
 /// Search status, recovery actions and the ranked list.
 struct ResultsSection: View {
     let snapshot: SearchSnapshot
-    let canRetry: Bool
     let palette: NordicPalette
     let cancel: () -> Void
     let retry: () -> Void
@@ -60,7 +59,7 @@ struct ResultsSection: View {
 
     private var recovery: some View {
         VStack(alignment: .leading, spacing: 8) {
-            if snapshot.phase == .failed, canRetry {
+            if snapshot.phase == .failed {
                 Button("Try again", action: retry)
                     .buttonStyle(NordicButton(palette: palette, primary: false))
             }
@@ -75,8 +74,8 @@ struct ResultsSection: View {
             VStack(alignment: .leading, spacing: 6) {
                 if let date = result.sourceDate {
                     Text("OSM catalog date: \(String(date.prefix(10)))")
-                }
-                if !result.covered {
+                    Text("Only pharmacies mapped in Finland are included.")
+                } else if !result.covered {
                     Text("Search coverage is limited.")
                 }
                 if result.pharmacies.count > SearchResult.visibleLimit {

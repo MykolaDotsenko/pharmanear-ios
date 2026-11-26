@@ -6,13 +6,13 @@ struct NordicPalette {
     let dark: Bool
     let christmas: Bool
 
-    init(dark: Bool, date: Date = Date()) {
+    init(dark: Bool) {
         self.dark = dark
-        christmas = Self.isChristmasSeason(date)
+        christmas = Self.isChristmasSeason()
     }
 
-    static func isChristmasSeason(_ date: Date) -> Bool {
-        let day = Calendar(identifier: .gregorian).dateComponents([.month, .day], from: date)
+    private static func isChristmasSeason() -> Bool {
+        let day = Calendar(identifier: .gregorian).dateComponents([.month, .day], from: Date())
         guard let month = day.month, let dayOfMonth = day.day else { return false }
         return (month == 11 && dayOfMonth >= 25) || month == 12 || (month == 1 && dayOfMonth <= 6)
     }

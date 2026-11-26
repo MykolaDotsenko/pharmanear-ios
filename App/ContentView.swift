@@ -27,7 +27,7 @@ struct ContentView: View {
                             ContourArt(palette: palette)
                         }
                         ResultsSection(
-                            snapshot: search.snapshot, canRetry: search.canRetry, palette: palette,
+                            snapshot: search.snapshot, palette: palette,
                             cancel: { search.cancel() }, retry: { search.retry() },
                             showMap: { mappedPharmacy = $0 }
                         )
@@ -56,14 +56,18 @@ struct ContentView: View {
             .navigationTitle(Text(verbatim: "PharmaNear"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) { languageButton }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    if offersLanguageChoice { languageButton }
+                }
             }
         }
         .sheet(item: $mappedPharmacy) { PharmacyMapSheet(pharmacy: $0) }
     }
 
-    /// The app follows the system language. iOS lets people choose a language per app in Settings,
-    /// so the button opens the app's page there rather than duplicating that choice.
+    /// The app follows the system language. iOS offers a language per app in Settings once more than one
+    /// language is set on the device, so the button appears only then and opens that page.
+    private var offersLanguageChoice: Bool { Locale.preferredLanguages.count > 1 }
+
     private var languageButton: some View {
         Button {
             if let settings = URL(string: UIApplication.openSettingsURLString) { openURL(settings) }

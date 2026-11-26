@@ -11,8 +11,8 @@ import Foundation
 /// for a newer one, keeps it in memory for later searches, and does not ask again for an hour after a
 /// failed attempt. A snapshot older than 30 days is never used.
 public actor PharmacyCatalog {
-    public typealias Download = @Sendable (URL) async throws -> (Data, URLResponse)
-    public typealias LiveSearch = @Sendable (Point) async throws -> SearchResult
+    typealias Download = @Sendable (URL) async throws -> (Data, URLResponse)
+    typealias LiveSearch = @Sendable (Point) async throws -> SearchResult
 
     public static let shared = PharmacyCatalog()
 
@@ -89,8 +89,13 @@ public actor PharmacyCatalog {
         guard needsRefresh(current, at: date) else { return current }
 
         lastRefreshAttempt = date
-        guard let latest = await latestSnapshot(), latest.isUsable(at: date),
-            latest.sourceDate > (current?.sourceDate ?? .distantPast)
+        let latest = await latestSnapshot()
+        if Task.isCancelled {
+            // A cancelled search says nothing about the network, so the next search may try again.
+            if lastRefreshAttempt == date { lastRefreshAttempt = nil }
+            return current
+        }
+        guard let latest, latest.isUsable(at: date), latest.sourceDate > (current?.sourceDate ?? .distantPast)
         else { return current }
         snapshot = latest
         return latest
@@ -144,12 +149,13 @@ struct Snapshot: Sendable {
         return age >= -PharmacyCatalog.day && age <= PharmacyCatalog.maximumAge
     }
 
-    /// The snapshot holds every mapped pharmacy in Finland, so a result in range is the nearest mapped one.
+    /// Coverage is not claimed: the snapshot has no pharmacies across the border, so near it a closer one
+    /// can be missing. The interface states the catalog's scope instead.
     func search(from origin: Point) -> SearchResult {
         let nearby = PharmacySearch.rank(pharmacies, from: origin)
             .filter { $0.distance <= Double(PharmacyCatalog.searchRadius) }
         return SearchResult(
-            pharmacies: nearby, radius: PharmacyCatalog.searchRadius, covered: !nearby.isEmpty,
+            pharmacies: nearby, radius: PharmacyCatalog.searchRadius, covered: false,
             sourceDate: sourceDateText)
     }
 }
