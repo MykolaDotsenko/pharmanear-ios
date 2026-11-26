@@ -19,3 +19,6 @@ The initial implementation, tests and ADR were generated with ChatGPT assistance
 No live provider smoke test, end-to-end UI automation, independent accessibility audit or production-grade availability guarantees. iOS full compilation needs Apple SDK. Do not represent these checks as passed until verified.
 
 The native design refresh adds five core regression tests. UI validation on an iPhone simulator and VoiceOver review remain pending; CI compiles the SwiftUI target but does not replace manual UI testing.
+
+## Release gate
+Check core tests, simulator build, map sheet interaction, largest Dynamic Type, dark mode, VoiceOver, and live provider responses. Mapped schedules are not proof of current opening hours. Capture actual simulator screenshots for the README only after these checks pass.

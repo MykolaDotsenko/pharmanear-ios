@@ -45,3 +45,9 @@ The native UI follows Finnish functionalism with paper/pine tones, a scalable sy
 
 ## Manual UI verification
 On an iPhone simulator test location permission denial, city search, cancellation, locale changes, dark mode, largest Dynamic Type and VoiceOver. The SwiftUI target requires macOS/Xcode; no claim of simulator or accessibility certification is made.
+
+## Map, schedules and icon
+The native MapKit sheet opens only on explicit selection. Opening hours are community-sourced OSM strings, explicitly unverified; use the Apteekki.fi link or pharmacy website for confirmation. The asset catalog contains a custom 1024px RGB app icon. The existing CI builds for an iOS simulator; manual UI validation remains required.
+
+## Architecture
+See [architecture notes](docs/architecture.md) for file responsibilities, state ownership, cancellation and official Apple references. The minimum deployment target remains iOS 16.
