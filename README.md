@@ -35,7 +35,13 @@ For a physical iPhone, select your own signing team in Xcode. No external Swift 
 - `.github/workflows/ci.yml`: Swift tests and simulator build on macOS.
 
 ## Verification
-Eight Swift core tests passed on Linux; SwiftUI source syntax and Xcode project plist checked. The Apple SDK is unavailable in the isolated environment, so the SwiftUI target is not yet compiled or tested on a simulator. The macOS CI build is required before submission; run the manual checklist too.
+The original core implementation reported eight passing tests. Five new XCTest scenarios cover result limits, pharmacy filtering, deterministic ranking, cancellation and search expansion. The refreshed revision must pass CI before submission. The Apple SDK is unavailable in the isolated environment, so the SwiftUI target is not yet compiled or tested on a simulator. The macOS CI build is required before submission; run the manual checklist too.
 
 ## Engineering process
 AI-assisted implementation was used. See [review checklist and limitations](docs/review.md). This is an initial candidate deliverable, not a claim of production certification.
+
+## Design
+The native UI follows Finnish functionalism with paper/pine tones, a scalable system serif heading, decorative Canvas contour art (not a geographic map), native navigation, numbered result rows, adaptive city controls for accessibility text sizes, dark mode and reduced-motion-aware button and result transitions. No additional dependencies or remote visual assets.
+
+## Manual UI verification
+On an iPhone simulator test location permission denial, city search, cancellation, locale changes, dark mode, largest Dynamic Type and VoiceOver. The SwiftUI target requires macOS/Xcode; no claim of simulator or accessibility certification is made.

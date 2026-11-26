@@ -15,3 +15,42 @@ final class CoreTests: XCTestCase {
     func testNearestSearch() async throws { let result = try await PharmacySearch.search(origin:origin){_ in Data(#"{"elements":[{"type":"node","id":1,"lat":60.452,"lon":22.267,"tags":{"amenity":"pharmacy"}}]}"#.utf8)}; XCTAssertEqual(result.radius,3000); XCTAssertTrue(result.covered); XCTAssertEqual(result.pharmacies.count,1) }
     func testInvalidLocation() async { do { _ = try await PharmacySearch.search(origin:.init(lat:100,lon:0)){_ in XCTFail("Unexpected fetch");return Data()}; XCTFail("Expected error") } catch {} }
 }
+
+
+extension CoreTests {
+    func testVisibleResultsAreBoundedWithoutChangingTotal() {
+        let rows=(0..<25).map { index in
+            Pharmacy(id:"node/\(index)",name:"Pharmacy \(index)",address:"",point:origin,distance:Double(index))
+        }
+        let result=SearchResult(pharmacies:rows,radius:3000,covered:true)
+        XCTAssertEqual(result.pharmacies.count,25)
+        XCTAssertEqual(result.visiblePharmacies.count,20)
+        XCTAssertEqual(result.visiblePharmacies.first?.id,"node/0")
+        XCTAssertEqual(result.visiblePharmacies.last?.id,"node/19")
+    }
+    func testNonPharmaciesAreNotPresented() throws {
+        let data=Data(#"{"elements":[{"type":"node","id":1,"lat":60.45,"lon":22.27,"tags":{"amenity":"cafe"}}]}"#.utf8)
+        XCTAssertTrue(try PharmacySearch.normalize(data,origin:origin).isEmpty)
+    }
+    func testTieBreakIsStable() throws {
+        let data=Data(#"{"elements":[{"type":"node","id":2,"lat":60.45,"lon":22.27,"tags":{"amenity":"pharmacy"}},{"type":"node","id":1,"lat":60.45,"lon":22.27,"tags":{"amenity":"pharmacy"}}]}"#.utf8)
+        XCTAssertEqual(try PharmacySearch.normalize(data,origin:origin).map(\.id),["node/1","node/2"])
+    }
+    func testCancelledProviderDoesNotProduceResults() async {
+        do {
+            _ = try await PharmacySearch.search(origin:origin) { _ in throw CancellationError() }
+            XCTFail("Cancellation must propagate")
+        } catch is CancellationError {
+            // Expected.
+        } catch {
+            XCTFail("Unexpected error: \(error)")
+        }
+    }
+    func testSearchExpandsWhenOnlyMappedPointIsOutsideGuaranteedCoverage() async throws {
+        let result=try await PharmacySearch.search(origin:origin) { _ in
+            Data(#"{"elements":[{"type":"node","id":1,"lat":60.48,"lon":22.27,"tags":{"amenity":"pharmacy"}}]}"#.utf8)
+        }
+        XCTAssertEqual(result.radius,10000)
+        XCTAssertTrue(result.covered)
+    }
+}

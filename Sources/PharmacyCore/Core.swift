@@ -26,6 +26,8 @@ public struct SearchResult: Sendable {
     public let pharmacies: [Pharmacy]
     public let radius: Int
     public let covered: Bool
+    /// The UI intentionally limits visible rows without misrepresenting the full count.
+    public var visiblePharmacies: [Pharmacy] { Array(pharmacies.prefix(20)) }
 }
 public enum SearchError: Error { case invalidLocation, invalidResponse }
 public enum PharmacySearch {

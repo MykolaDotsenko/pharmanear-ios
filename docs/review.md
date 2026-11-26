@@ -17,3 +17,5 @@ The initial implementation, tests and ADR were generated with ChatGPT assistance
 
 ## Known gaps
 No live provider smoke test, end-to-end UI automation, independent accessibility audit or production-grade availability guarantees. iOS full compilation needs Apple SDK. Do not represent these checks as passed until verified.
+
+The native design refresh adds five core regression tests. UI validation on an iPhone simulator and VoiceOver review remain pending; CI compiles the SwiftUI target but does not replace manual UI testing.
