@@ -1,3 +1,4 @@
+import PharmacyCore
 import Foundation
 
 let words: [String:[String:String]] = [
