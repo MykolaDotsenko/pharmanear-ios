@@ -57,6 +57,15 @@ public actor PharmacyCatalog {
         self.now = now
     }
 
+    /// The bundled snapshot read as of `date`, with no network at all: no refresh and no live fallback.
+    /// UI tests use it so their results do not depend on today's date or on public services.
+    public static func offline(at date: Date) -> PharmacyCatalog {
+        PharmacyCatalog(
+            download: { _ in throw URLError(.notConnectedToInternet) },
+            live: { _ in throw URLError(.notConnectedToInternet) },
+            now: { date })
+    }
+
     public static func bundledData() throws -> Data {
         guard let url = Bundle.module.url(forResource: "finland-pharmacies", withExtension: "json") else {
             throw SearchError.invalidResponse

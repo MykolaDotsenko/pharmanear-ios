@@ -4,7 +4,7 @@ import UIKit
 
 /// The single screen: search controls, results and attribution.
 struct ContentView: View {
-    @StateObject private var search = SearchSession(location: DeviceLocation())
+    @StateObject private var search = SearchSession.makeForApp()
     @State private var mappedPharmacy: Pharmacy?
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.accessibilityReduceMotion) private var reduceMotion

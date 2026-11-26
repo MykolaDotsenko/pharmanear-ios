@@ -93,6 +93,21 @@ final class CatalogTests: XCTestCase {
         XCTAssertFalse(calls.contains { $0.hasPrefix("live") }, "The refreshed catalog must answer")
     }
 
+    func testOfflineCatalogAnswersFromTheBundleAtAFixedDateWithoutNetwork() async throws {
+        let catalog = PharmacyCatalog.offline(at: now.addingTimeInterval(20 * day))
+        let result = try await catalog.lookup(origin: turku)
+        XCTAssertEqual(result.pharmacies.first?.name, "Yliopiston Apteekki")
+        XCTAssertEqual(result.sourceDate, "2026-11-24T21:21:23Z")
+
+        let expired = PharmacyCatalog.offline(at: now.addingTimeInterval(40 * day))
+        do {
+            _ = try await expired.lookup(origin: turku)
+            XCTFail("An expired snapshot must not fall back to the network")
+        } catch {
+            XCTAssertEqual((error as? URLError)?.code, .notConnectedToInternet)
+        }
+    }
+
     func testOlderPublishedSnapshotIsIgnored() async throws {
         let network = Recorder(download: catalog(date: "2026-11-01T00:00:00Z"))
         let catalog = makeCatalog(bundled: catalog(date: "2026-11-10T00:00:00Z"), network: network)
