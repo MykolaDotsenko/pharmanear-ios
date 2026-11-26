@@ -27,7 +27,7 @@ public struct OverpassClient: Sendable {
     }()
 
     public static let shared = OverpassClient { request in
-        try await session.data(for: request)
+        try await OverpassClient.session.data(for: request)
     }
 
     private let transport: Transport
