@@ -4,16 +4,16 @@
  classes = {};
  objectVersion = 56;
  objects = {
-  A0000000000000000000015 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App/Finder.swift; sourceTree = "<group>"; };
-  A0000000000000000000016 = {isa = PBXBuildFile; fileRef = A0000000000000000000015; };
-  A0000000000000000000017 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App/ContentView.swift; sourceTree = "<group>"; };
-  A0000000000000000000018 = {isa = PBXBuildFile; fileRef = A0000000000000000000017; };
-  A0000000000000000000019 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App/NordicDesign.swift; sourceTree = "<group>"; };
-  A000000000000000000001a = {isa = PBXBuildFile; fileRef = A0000000000000000000019; };
-  A000000000000000000001b = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App/PharmacyMapSheet.swift; sourceTree = "<group>"; };
-  A000000000000000000001c = {isa = PBXBuildFile; fileRef = A000000000000000000001b; };
-  A000000000000000000001d = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App/Translations.swift; sourceTree = "<group>"; };
-  A000000000000000000001e = {isa = PBXBuildFile; fileRef = A000000000000000000001d; };
+  A00000000000000000000015 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App/Finder.swift; sourceTree = "<group>"; };
+  A00000000000000000000016 = {isa = PBXBuildFile; fileRef = A00000000000000000000015; };
+  A00000000000000000000017 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App/ContentView.swift; sourceTree = "<group>"; };
+  A00000000000000000000018 = {isa = PBXBuildFile; fileRef = A00000000000000000000017; };
+  A00000000000000000000019 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App/NordicDesign.swift; sourceTree = "<group>"; };
+  A0000000000000000000001A = {isa = PBXBuildFile; fileRef = A00000000000000000000019; };
+  A0000000000000000000001B = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App/PharmacyMapSheet.swift; sourceTree = "<group>"; };
+  A0000000000000000000001C = {isa = PBXBuildFile; fileRef = A0000000000000000000001B; };
+  A0000000000000000000001D = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App/Translations.swift; sourceTree = "<group>"; };
+  A0000000000000000000001E = {isa = PBXBuildFile; fileRef = A0000000000000000000001D; };
   A00000000000000000000013 = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = App/Assets.xcassets; sourceTree = "<group>"; };
   A00000000000000000000014 = {isa = PBXBuildFile; fileRef = A00000000000000000000013; };
   A00000000000000000000001 = {isa = PBXBuildFile; fileRef = A00000000000000000000003; };
@@ -21,9 +21,9 @@
   A00000000000000000000003 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App/PharmaNearApp.swift; sourceTree = "<group>"; };
   A00000000000000000000004 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/PharmacyCore/Core.swift; sourceTree = "<group>"; };
   A00000000000000000000005 = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PharmaNear.app; sourceTree = BUILT_PRODUCTS_DIR; };
-  A00000000000000000000006 = {isa = PBXGroup; children = (A00000000000000000000003,A00000000000000000000004,A00000000000000000000013,A0000000000000000000015,A0000000000000000000017,A0000000000000000000019,A000000000000000000001b,A000000000000000000001d,A00000000000000000000007,); sourceTree = "<group>"; };
+  A00000000000000000000006 = {isa = PBXGroup; children = (A00000000000000000000003,A00000000000000000000004,A00000000000000000000013,A00000000000000000000015,A00000000000000000000017,A00000000000000000000019,A0000000000000000000001B,A0000000000000000000001D,A00000000000000000000007,); sourceTree = "<group>"; };
   A00000000000000000000007 = {isa = PBXGroup; children = (A00000000000000000000005,); name = Products; sourceTree = "<group>"; };
-  A00000000000000000000008 = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A00000000000000000000001,A00000000000000000000002,A0000000000000000000016,A0000000000000000000018,A000000000000000000001a,A000000000000000000001c,A000000000000000000001e,); runOnlyForDeploymentPostprocessing = 0; };
+  A00000000000000000000008 = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A00000000000000000000001,A00000000000000000000002,A00000000000000000000016,A00000000000000000000018,A0000000000000000000001A,A0000000000000000000001C,A0000000000000000000001E,); runOnlyForDeploymentPostprocessing = 0; };
   A00000000000000000000009 = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
   A0000000000000000000000A = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (A00000000000000000000014,); runOnlyForDeploymentPostprocessing = 0; };
   A0000000000000000000000B = {isa = PBXNativeTarget; buildConfigurationList = A0000000000000000000000E; buildPhases = (A00000000000000000000008,A00000000000000000000009,A0000000000000000000000A,); buildRules = (); dependencies = (); name = PharmaNear; productName = PharmaNear; productReference = A00000000000000000000005; productType = "com.apple.product-type.application"; };
