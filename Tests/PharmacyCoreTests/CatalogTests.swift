@@ -66,6 +66,19 @@ final class CatalogTests: XCTestCase {
         XCTAssertEqual(calls, ["download \(PharmacyCatalog.refreshURL.absoluteString)"])
     }
 
+    func testConcurrentLookupsShareTheRefreshedSnapshot() async throws {
+        let network = Recorder(download: catalog(date: "2026-11-25T00:00:00Z"), delay: .milliseconds(100))
+        let catalog = makeCatalog(bundled: catalog(date: "2026-10-01T00:00:00Z"), network: network)
+        let first = Task { try await catalog.lookup(origin: turku) }
+        await network.waitForCalls(1)
+        let second = try await catalog.lookup(origin: City.helsinki.centre)
+        let initial = try await first.value
+        XCTAssertEqual(initial.sourceDate, "2026-11-25T00:00:00Z")
+        XCTAssertEqual(second.sourceDate, initial.sourceDate)
+        let calls = await network.calls
+        XCTAssertEqual(calls, ["download \(PharmacyCatalog.refreshURL.absoluteString)"])
+    }
+
     func testFailedRefreshKeepsTheValidCatalogAndWaitsBeforeRetrying() async throws {
         let network = Recorder(download: nil)
         let catalog = makeCatalog(bundled: catalog(date: "2026-11-10T00:00:00Z"), network: network)
