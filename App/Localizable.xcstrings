@@ -83,6 +83,94 @@
         }
       }
     },
+    "Ahead" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ahead"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suoraan"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rakt fram"
+          }
+        }
+      }
+    },
+    "Behind" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Behind"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Taakse"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bakåt"
+          }
+        }
+      }
+    },
+    "Behind left" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Behind left"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Takaviistoon vasemmalle"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Snett bakåt vänster"
+          }
+        }
+      }
+    },
+    "Behind right" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Behind right"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Takaviistoon oikealle"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Snett bakåt höger"
+          }
+        }
+      }
+    },
     "Cancel" : {
       "comment" : "Cancels the running search.",
       "localizations" : {
@@ -146,6 +234,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kontrollera apoteksuppgifter på Apteekki.fi"
+          }
+        }
+      }
+    },
+    "Choose pharmacy" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose pharmacy"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Valitse apteekki"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Välj apotek"
           }
         }
       }
@@ -217,6 +327,28 @@
         }
       }
     },
+    "Close radar" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Close radar"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sulje tutka"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stäng radarn"
+          }
+        }
+      }
+    },
     "Closest mapped result" : {
       "localizations" : {
         "en" : {
@@ -235,6 +367,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Närmaste kartresultat"
+          }
+        }
+      }
+    },
+    "Compass-up" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compass-up"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kompassisuunta"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kompassriktning"
+          }
+        }
+      }
+    },
+    "Direction of travel" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Direction of travel"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kulkusuunta"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Färdriktning"
           }
         }
       }
@@ -279,6 +455,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Avstånden är uppskattade fågelvägsavstånd, inte gångvägar."
+          }
+        }
+      }
+    },
+    "East" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "East"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Itä"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öster"
           }
         }
       }
@@ -371,6 +569,28 @@
         }
       }
     },
+    "GPS accuracy: %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GPS accuracy: %@"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GPS-tarkkuus: %@"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GPS-noggrannhet: %@"
+          }
+        }
+      }
+    },
     "Helsinki" : {
       "comment" : "City name; use the official name in each language.",
       "localizations" : {
@@ -439,6 +659,50 @@
         }
       }
     },
+    "Left" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Left"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vasemmalle"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vänster"
+          }
+        }
+      }
+    },
+    "Live GPS" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Live GPS"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GPS käytössä"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GPS aktiv"
+          }
+        }
+      }
+    },
     "Location is unavailable or denied. Choose a city centre instead." : {
       "localizations" : {
         "en" : {
@@ -480,6 +744,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Platsintegritet"
+          }
+        }
+      }
+    },
+    "Location unavailable or denied." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Location unavailable or denied."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sijainti ei ole saatavilla tai lupaa ei annettu."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Positionen är otillgänglig eller nekad."
           }
         }
       }
@@ -597,6 +883,28 @@
         }
       }
     },
+    "Near the mapped pharmacy. Look for its entrance." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Near the mapped pharmacy. Look for its entrance."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Olet lähellä kartan apteekkia. Etsi sisäänkäynti."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Du är nära det kartlagda apoteket. Leta efter ingången."
+          }
+        }
+      }
+    },
     "Nearby pharmacies" : {
       "comment" : "Results heading.",
       "localizations" : {
@@ -642,25 +950,90 @@
         }
       }
     },
-    "OSM catalog date: %@" : {
-      "comment" : "The argument is a date such as 2026-11-24.",
+    "North" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "OSM catalog date: %@"
+            "value" : "North"
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "OSM-aineiston päiväys: %@"
+            "value" : "Pohjoinen"
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Datum för OSM-katalogen: %@"
+            "value" : "Norr"
+          }
+        }
+      }
+    },
+    "North-east" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "North-east"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Koillinen"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nordost"
+          }
+        }
+      }
+    },
+    "North-up" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "North-up"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pohjoinen ylhäällä"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Norr uppåt"
+          }
+        }
+      }
+    },
+    "North-west" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "North-west"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Luode"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nordväst"
           }
         }
       }
@@ -757,6 +1130,29 @@
         }
       }
     },
+    "OSM catalog date: %@" : {
+      "comment" : "The argument is a date such as 2026-11-24.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OSM catalog date: %@"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OSM-aineiston päiväys: %@"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Datum för OSM-katalogen: %@"
+          }
+        }
+      }
+    },
     "Oulu" : {
       "comment" : "City name; use the official name in each language.",
       "localizations" : {
@@ -822,6 +1218,72 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Apotekskarta"
+          }
+        }
+      }
+    },
+    "Pharmacy radar" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pharmacy radar"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apteekkitutka"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apoteksradar"
+          }
+        }
+      }
+    },
+    "Radar range: %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Radar range: %@"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tutkan kantama: %@"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Radarns räckvidd: %@"
+          }
+        }
+      }
+    },
+    "Right" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Right"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oikealle"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Höger"
           }
         }
       }
@@ -1003,6 +1465,138 @@
         }
       }
     },
+    "Slightly left" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Slightly left"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hieman vasemmalle"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lite åt vänster"
+          }
+        }
+      }
+    },
+    "Slightly right" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Slightly right"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hieman oikealle"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lite åt höger"
+          }
+        }
+      }
+    },
+    "South" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "South"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Etelä"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Söder"
+          }
+        }
+      }
+    },
+    "South-east" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "South-east"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kaakko"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sydost"
+          }
+        }
+      }
+    },
+    "South-west" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "South-west"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lounas"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sydväst"
+          }
+        }
+      }
+    },
+    "Straight-line direction only, not a walking route. Live location stays on this device." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Straight-line direction only, not a walking route. Live location stays on this device."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suunta linnuntietä, ei kävelyreitti. Sijainti pysyy laitteellasi."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Riktning fågelvägen, inte en gångväg. Din position stannar på enheten."
+          }
+        }
+      }
+    },
     "Tampere" : {
       "comment" : "City name; use the official name in each language.",
       "localizations" : {
@@ -1022,6 +1616,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tammerfors"
+          }
+        }
+      }
+    },
+    "Target is outside the displayed range." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Target is outside the displayed range."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kohde on tutkan kantaman ulkopuolella."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Målet ligger utanför radarns räckvidd."
+          }
+        }
+      }
+    },
+    "The pharmacy is within GPS uncertainty." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The pharmacy is within GPS uncertainty."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apteekki on GPS-epävarmuusalueella."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apoteket ligger inom GPS-osäkerheten."
           }
         }
       }
@@ -1135,6 +1773,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Vasa"
+          }
+        }
+      }
+    },
+    "Waiting for a new GPS fix…" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Waiting for a new GPS fix…"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Odotetaan uutta GPS-sijaintia…"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Väntar på en ny GPS-position…"
+          }
+        }
+      }
+    },
+    "West" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "West"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Länsi"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Väster"
           }
         }
       }

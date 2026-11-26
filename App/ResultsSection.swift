@@ -8,6 +8,7 @@ struct ResultsSection: View {
     let cancel: () -> Void
     let retry: () -> Void
     let showMap: (Pharmacy) -> Void
+    let showRadar: ([Pharmacy]) -> Void
 
     @State private var showsAll = false
     @State private var showsDetails = false
@@ -35,6 +36,9 @@ struct ResultsSection: View {
             }
             if let result = snapshot.result, !result.pharmacies.isEmpty {
                 details(for: result)
+                Button("Pharmacy radar") { showRadar(result.pharmacies) }
+                    .buttonStyle(NordicButton(palette: palette, primary: false))
+                    .accessibilityIdentifier("open-radar")
                 list(of: result)
             }
         }
