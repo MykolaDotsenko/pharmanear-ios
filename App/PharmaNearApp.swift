@@ -1,6 +1,7 @@
 import SwiftUI
 import CoreLocation
 import MapKit
+import UIKit
 
 @main struct PharmaNearApp: App {
     var body: some Scene { WindowGroup { ContentView() } }
@@ -14,11 +15,14 @@ import MapKit
     private var task: Task<Void,Never>?
     private var generation = 0
     private var awaitingLocation = false
+    private var lastCity: (Point,String)?
+    private var lastWasLocation = false
+    func retry() { if lastWasLocation { locate() } else if let lastCity { search(lastCity.0,name:lastCity.1) } }
     override init() { super.init(); manager.delegate = self; manager.desiredAccuracy = kCLLocationAccuracyHundredMeters }
     var busy: Bool { status == "loading" || status == "locating" }
     func cancel() { generation += 1; task?.cancel(); task = nil; awaitingLocation = false; manager.stopUpdatingLocation(); result = nil; status = "cancelled" }
     func locate() {
-        cancel(); status = "locating"; awaitingLocation = true; origin = "device"
+        cancel(); status = "locating"; awaitingLocation = true; origin = "device"; lastWasLocation = true
         handleAuthorization()
         let id = generation
         task = Task { [weak self] in
@@ -44,6 +48,8 @@ import MapKit
     nonisolated func locationManager(_ manager: CLLocationManager,didFailWithError error: Error) { Task { @MainActor [weak self] in guard let self,self.awaitingLocation else { return }; self.awaitingLocation = false;self.task?.cancel();self.status = "denied" } }
     func search(_ point: Point,name: String) {
         cancel(); origin = name; status = "loading"; let id = generation
+        lastWasLocation = name == "device"
+        if !lastWasLocation { lastCity = (point,name) }
         task = Task { [weak self] in
             do { let found = try await PharmacySearch.search(origin:point,fetch:{try await PharmacySearch.fetch(query:$0)}); guard let self, !Task.isCancelled,self.generation == id else{return};self.result = found;self.status = found.pharmacies.isEmpty ? "empty" : "found" }
             catch { guard let self,!Task.isCancelled,self.generation == id else{return};self.status = "error" }
@@ -123,17 +129,19 @@ private struct ContourArt: View {
     @State private var city = 0
     @State private var language = "en"
     @State private var selectedMap: Pharmacy?
+    @State private var expanded = false
+    @State private var privacyExpanded = false
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.dynamicTypeSize) private var typeSize
     private var palette: NordicPalette { NordicPalette(dark:colorScheme == .dark) }
-    private func t(_ key: String) -> String { words[language]?[key] ?? extraWords[language]?[key] ?? words["en"]?[key] ?? extraWords["en"]?[key] ?? key }
+    private func t(_ key: String) -> String { words[language]?[key] ?? extraWords[language]?[key] ?? uxWords[language]?[key] ?? words["en"]?[key] ?? extraWords["en"]?[key] ?? uxWords["en"]?[key] ?? key }
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment:.leading,spacing:24) {
                     hero
-                    ContourArt(palette:palette)
+                    if finder.status == "idle" { ContourArt(palette:palette) }
                     results
                     VStack(alignment:.leading,spacing:8) {
                         Rectangle().fill(palette.line).frame(height:1).accessibilityHidden(true)
@@ -169,6 +177,12 @@ private struct ContourArt: View {
                 }
             }
         }
+        .onChange(of:finder.status) { value in
+            if value == "loading" || value == "locating" { expanded = false }
+            if ["found","empty","error","denied","cancelled"].contains(value) {
+                UIAccessibility.post(notification:.announcement,argument:statusText)
+            }
+        }
         .sheet(item:$selectedMap) { pharmacy in
             PharmacyMapSheet(pharmacy:pharmacy,title:t("mapTitle"),close:t("closeMap"),disclosure:t("mapPrivacy"),unnamed:t("unnamed"))
         }
@@ -178,10 +192,10 @@ private struct ContourArt: View {
         VStack(alignment:.leading,spacing:15) {
             Text(t("eyebrow")).font(.caption.weight(.semibold)).tracking(1.7).foregroundStyle(palette.pine)
             Text(t("heading"))
-                .font(.system(.largeTitle,design:.serif,weight:.regular))
+                .font(.system(finder.status == "idle" ? .largeTitle : .title2,design:.serif,weight:.regular))
                 .accessibilityAddTraits(.isHeader)
                 .fixedSize(horizontal:false,vertical:true)
-            Text(t("intro")).font(.body).foregroundStyle(palette.muted)
+            if finder.status == "idle" { Text(t("intro")).font(.body).foregroundStyle(palette.muted) }
             Button { finder.locate() } label: {
                 HStack(spacing:10) {
                     Image(systemName:"location").accessibilityHidden(true)
@@ -192,7 +206,9 @@ private struct ContourArt: View {
             }
             .buttonStyle(NordicButton(palette:palette,primary:true))
             .accessibilityIdentifier("use-location")
-            Text(t("privacy")).font(.footnote).foregroundStyle(palette.muted)
+            DisclosureGroup(isExpanded:$privacyExpanded) {
+                Text(t("privacy")).font(.footnote).foregroundStyle(palette.muted).frame(maxWidth:.infinity,alignment:.leading)
+            } label: { Text(t("privacySummary")).font(.subheadline).foregroundStyle(palette.pine).frame(minHeight:44,alignment:.leading) }
             VStack(alignment:.leading,spacing:6) {
                 Text(t("city")).font(.subheadline.weight(.semibold))
                 if typeSize.isAccessibilitySize {
@@ -237,16 +253,30 @@ private struct ContourArt: View {
             } else {
                 Text(statusText).font(.subheadline).foregroundStyle(palette.muted).accessibilityIdentifier("search-status")
             }
+            if ["error","denied","empty"].contains(finder.status) {
+                VStack(alignment:.leading,spacing:8) {
+                    if finder.status == "error" {
+                        Button(t("retry")) { finder.retry() }.buttonStyle(NordicButton(palette:palette,primary:false))
+                    }
+                    Link(t("fallback"),destination:URL(string:"https://www.apteekki.fi/apteekkihaku")!).font(.subheadline.weight(.semibold)).frame(minHeight:44)
+                }
+            }
             if let result=finder.result, !result.pharmacies.isEmpty {
+                Text(t("distanceNote")).font(.footnote).foregroundStyle(palette.muted)
+                Text(t("mapPrivacy")).font(.caption).foregroundStyle(palette.muted)
                 LazyVStack(alignment:.leading,spacing:0) {
-                    ForEach(Array(result.visiblePharmacies.enumerated()),id:\.element.id) { index,pharmacy in
+                    ForEach(Array(result.visiblePharmacies.prefix(expanded ? 20 : 5).enumerated()),id:\.element.id) { index,pharmacy in
                         pharmacyRow(pharmacy,index:index)
                     }
                 }
-                .transition(.opacity)
+                if result.pharmacies.count > 5 {
+                    Button(expanded ? t("showLess") : t("showAll")) { expanded.toggle() }
+                        .buttonStyle(NordicButton(palette:palette,primary:false))
+                        .accessibilityIdentifier("show-more")
+                }
             }
         }
-        .animation(reduceMotion ? nil : .easeOut(duration:0.22),value:finder.status)
+        // Do not fade text during status changes; maintain contrast throughout.
     }
     private func pharmacyRow(_ pharmacy: Pharmacy,index:Int) -> some View {
         let name=pharmacy.name.isEmpty ? t("unnamed") : pharmacy.name
@@ -261,20 +291,13 @@ private struct ContourArt: View {
                 }
                 Spacer(minLength:0)
             }
-            HStack(alignment:.center,spacing:12) {
+            VStack(alignment:.leading,spacing:6) {
                 Text(formattedDistance(pharmacy.distance)).font(.title2.weight(.medium)).monospacedDigit()
-                Spacer(minLength:4)
-                Button {
-                    let item=MKMapItem(placemark:MKPlacemark(coordinate:CLLocationCoordinate2D(latitude:pharmacy.point.lat,longitude:pharmacy.point.lon)))
-                    item.name=name
-                    item.openInMaps(launchOptions:nil)
-                } label: {
-                    Label(t("map"),systemImage:"arrow.up.right").font(.subheadline.weight(.semibold)).frame(minHeight:44)
-                }.accessibilityLabel(t("map")+": "+name)
+                ViewThatFits(in:.horizontal) {
+                    HStack(spacing:16) { mapPreview(pharmacy,name:name); externalMap(pharmacy,name:name) }
+                    VStack(alignment:.leading,spacing:0) { mapPreview(pharmacy,name:name); externalMap(pharmacy,name:name) }
+                }
             }
-            Button { selectedMap=pharmacy } label: { Label(t("mapHere"),systemImage:"map").font(.subheadline.weight(.semibold)).frame(minHeight:44) }
-                .accessibilityLabel(t("mapHere")+": "+name).accessibilityHint(t("mapPrivacy"))
-            Text(t("mapPrivacy")).font(.caption).foregroundStyle(palette.muted)
         }
         .padding(14)
         .background(index == 0 ? palette.wash : Color.clear)
@@ -282,6 +305,19 @@ private struct ContourArt: View {
             if index == 0 { Rectangle().fill(palette.pine).frame(width:3).accessibilityHidden(true) }
         }
         .overlay(alignment:.bottom) { Rectangle().fill(palette.line).frame(height:1).accessibilityHidden(true) }
+    }
+    private func externalMap(_ pharmacy: Pharmacy,name:String) -> some View {
+                Button {
+                    let item=MKMapItem(placemark:MKPlacemark(coordinate:CLLocationCoordinate2D(latitude:pharmacy.point.lat,longitude:pharmacy.point.lon)))
+                    item.name=name
+                    item.openInMaps(launchOptions:nil)
+                } label: {
+                    Label(t("map"),systemImage:"arrow.up.right").font(.subheadline.weight(.semibold)).frame(minHeight:44)
+                }.accessibilityLabel(t("map")+": "+name)
+    }
+    private func mapPreview(_ pharmacy: Pharmacy,name:String) -> some View {
+        Button { selectedMap=pharmacy } label: { Label(t("mapHere"),systemImage:"map").font(.subheadline.weight(.semibold)).frame(minHeight:44) }
+            .accessibilityLabel(t("mapHere")+": "+name).accessibilityHint(t("mapPrivacy"))
     }
     private var statusText: String {
         guard finder.status == "found",let result=finder.result else { return t(finder.status) }
@@ -336,4 +372,10 @@ private let extraWords:[String:[String:String]] = [
  "en":["hours":"Mapped hours (unverified)","missingHours":"Hours not listed","mapHere":"Map preview","closeMap":"Close map","mapTitle":"Pharmacy map","mapPrivacy":"MapKit loads this pharmacy location; Apple receives network metadata.","directory":"Check Finnish pharmacy details at Apteekki.fi","shown":"Showing up to 20"],
  "fi":["hours":"Karttaan merkityt aukioloajat (vahvistamatta)","missingHours":"Aukioloaikoja ei ilmoitettu","mapHere":"Karttanäkymä","closeMap":"Sulje kartta","mapTitle":"Apteekin kartta","mapPrivacy":"MapKit lataa apteekin sijainnin; Apple saa verkkoyhteyden metatietoja.","directory":"Tarkista apteekin tiedot Apteekki.fi-palvelusta","shown":"Näytetään enintään 20"],
  "sv":["hours":"Kartlagda öppettider (ej bekräftade)","missingHours":"Öppettider saknas","mapHere":"Kartvy","closeMap":"Stäng kartan","mapTitle":"Apotekskarta","mapPrivacy":"MapKit laddar apotekets plats; Apple får nätverksmetadata.","directory":"Kontrollera apoteksuppgifter på Apteekki.fi","shown":"Visar högst 20"]
+]
+
+private let uxWords:[String:[String:String]] = [
+ "en":["privacySummary":"Location privacy","retry":"Try again","fallback":"Find a pharmacy on Apteekki.fi","distanceNote":"Distances are straight-line estimates, not walking routes.","showAll":"Show more pharmacies","showLess":"Show fewer pharmacies"],
+ "fi":["privacySummary":"Sijainnin yksityisyys","retry":"Yritä uudelleen","fallback":"Etsi apteekki Apteekki.fi-palvelusta","distanceNote":"Etäisyydet ovat linnuntiearvioita, eivät kävelyreittejä.","showAll":"Näytä lisää apteekkeja","showLess":"Näytä vähemmän apteekkeja"],
+ "sv":["privacySummary":"Platsintegritet","retry":"Försök igen","fallback":"Hitta apotek på Apteekki.fi","distanceNote":"Avstånden är uppskattade fågelvägsavstånd, inte gångvägar.","showAll":"Visa fler apotek","showLess":"Visa färre apotek"]
 ]
