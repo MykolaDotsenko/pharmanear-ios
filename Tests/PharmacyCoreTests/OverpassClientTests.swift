@@ -1,9 +1,11 @@
 import Foundation
-#if canImport(FoundationNetworking)
-import FoundationNetworking
-#endif
 import XCTest
+
 @testable import PharmacyCore
+
+#if canImport(FoundationNetworking)
+    import FoundationNetworking
+#endif
 
 private actor StubTransport {
     var statuses: [Int]
@@ -15,11 +17,13 @@ private actor StubTransport {
 
     func send(_ request: URLRequest) throws -> (Data, URLResponse) {
         guard let url = request.url, let host = url.host,
-              !statuses.isEmpty else { throw URLError(.badURL) }
+            !statuses.isEmpty
+        else { throw URLError(.badURL) }
         hosts.append(host)
         let status = statuses.removeFirst()
-        let response = HTTPURLResponse(url: url, statusCode: status,
-                                      httpVersion: "HTTP/1.1", headerFields: nil)!
+        let response = HTTPURLResponse(
+            url: url, statusCode: status,
+            httpVersion: "HTTP/1.1", headerFields: nil)!
         return (Data(#"{"elements":[]}"#.utf8), response)
     }
 }
@@ -53,7 +57,8 @@ final class OverpassClientTests: XCTestCase {
     }
 
     func testMalformedElementDoesNotDiscardValidPharmacy() throws {
-        let payload = Data(#"{"elements":[null,{"type":"node","id":1,"lat":60.45,"lon":22.27,"tags":{"amenity":"pharmacy"}}]}"#.utf8)
+        let payload = Data(
+            #"{"elements":[null,{"type":"node","id":1,"lat":60.45,"lon":22.27,"tags":{"amenity":"pharmacy"}}]}"#.utf8)
         let rows = try PharmacySearch.normalize(payload, origin: Point(lat: 60.45, lon: 22.27))
         XCTAssertEqual(rows.map(\.id), ["node/1"])
     }

@@ -1,6 +1,7 @@
 import Foundation
+
 #if canImport(FoundationNetworking)
-import FoundationNetworking
+    import FoundationNetworking
 #endif
 
 public struct OverpassClient: Sendable {
@@ -13,7 +14,7 @@ public struct OverpassClient: Sendable {
 
     private static let endpoints = [
         URL(string: "https://overpass-api.de/api/interpreter")!,
-        URL(string: "https://overpass.private.coffee/api/interpreter")!
+        URL(string: "https://overpass.private.coffee/api/interpreter")!,
     ]
 
     private static let session: URLSession = {
@@ -75,8 +76,10 @@ public struct OverpassClient: Sendable {
             }
         }
         if let networkError = error as? URLError {
-            return [.timedOut, .cannotFindHost, .cannotConnectToHost, .networkConnectionLost,
-                    .dnsLookupFailed, .notConnectedToInternet].contains(networkError.code)
+            return [
+                .timedOut, .cannotFindHost, .cannotConnectToHost, .networkConnectionLost,
+                .dnsLookupFailed, .notConnectedToInternet,
+            ].contains(networkError.code)
         }
         return error is DecodingError || (error as? SearchError) == .invalidResponse
     }

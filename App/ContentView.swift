@@ -4,7 +4,7 @@ import MapKit
 import UIKit
 
 @MainActor struct ContentView: View {
-    @StateObject private var finder = Finder()
+    @StateObject private var search = SearchSession(location: DeviceLocation())
     @State private var city = 0
     @State private var language = "en"
     @State private var selectedMap: Pharmacy?
@@ -20,9 +20,9 @@ import UIKit
         NavigationStack {
             ScrollViewReader { proxy in
             ScrollView {
-                VStack(alignment:.leading,spacing:finder.status == "found" ? 14 : 24) {
+                VStack(alignment:.leading,spacing:status == "found" ? 14 : 24) {
                     hero
-                    if finder.status == "idle" { ContourArt(palette:palette) }
+                    if status == "idle" { ContourArt(palette:palette) }
                     results.id("results")
                     VStack(alignment:.leading,spacing:8) {
                         Rectangle().fill(palette.line).frame(height:1).accessibilityHidden(true)
@@ -32,10 +32,10 @@ import UIKit
                     }
                 }
                 .frame(maxWidth:620)
-                .padding(.horizontal,20).padding(.vertical,finder.status == "found" ? 14 : 24)
+                .padding(.horizontal,20).padding(.vertical,status == "found" ? 14 : 24)
                 .frame(maxWidth:.infinity)
             }
-            .onChange(of:finder.status) { value in
+            .onChange(of:status) { value in
                 if value == "found" && !UIAccessibility.isVoiceOverRunning {
                     if reduceMotion { proxy.scrollTo("results",anchor:.top) }
                     else { withAnimation(.easeOut(duration:0.25)) { proxy.scrollTo("results",anchor:.top) } }
@@ -65,7 +65,7 @@ import UIKit
                 }
             }
         }
-        .onChange(of:finder.status) { value in
+        .onChange(of:status) { value in
             if value == "loading" || value == "locating" { expanded = false }
             if ["found","empty","error","denied","cancelled"].contains(value) {
                 UIAccessibility.post(notification:.announcement,argument:statusText)
@@ -80,11 +80,11 @@ import UIKit
         VStack(alignment:.leading,spacing:15) {
             Text(t("eyebrow")).font(.caption.weight(.semibold)).tracking(1.7).foregroundStyle(palette.festiveInk)
             Text(t("heading"))
-                .font(.system(finder.status == "idle" ? .largeTitle : .title2,design:.serif,weight:.regular))
+                .font(.system(status == "idle" ? .largeTitle : .title2,design:.serif,weight:.regular))
                 .accessibilityAddTraits(.isHeader)
                 .fixedSize(horizontal:false,vertical:true)
-            if finder.status == "idle" { Text(t("intro")).font(.body).foregroundStyle(palette.muted) }
-            Button { finder.locate() } label: {
+            if status == "idle" { Text(t("intro")).font(.body).foregroundStyle(palette.muted) }
+            Button { search.locate() } label: {
                 HStack(spacing:10) {
                     Image(systemName:"location").accessibilityHidden(true)
                     Text(t("locate")).multilineTextAlignment(.leading)
@@ -114,7 +114,7 @@ import UIKit
     }
     private var cityPicker: some View {
         Picker(t("city"),selection:$city) {
-            ForEach(PharmacySearch.cities.indices,id:\.self) { Text(PharmacySearch.cities[$0].0).tag($0) }
+            ForEach(City.allCases.indices,id:\.self) { Text(City.allCases[$0].rawValue).tag($0) }
         }
         .pickerStyle(.menu)
         .frame(minHeight:48,alignment:.leading)
@@ -122,8 +122,7 @@ import UIKit
     }
     private var citySearch: some View {
         Button(t("search")) {
-            let selected=PharmacySearch.cities[city]
-            finder.search(selected.1,name:selected.0)
+            search.search(from:City.allCases[city])
         }
         .buttonStyle(NordicButton(palette:palette,primary:false))
         .accessibilityIdentifier("city-search")
@@ -134,22 +133,22 @@ import UIKit
             HStack(alignment:.firstTextBaseline) {
                 Text(t("results")).font(.title2.weight(.semibold)).accessibilityAddTraits(.isHeader)
                 Spacer(minLength:8)
-                if finder.busy { Button(t("cancel")) { finder.cancel() }.font(.subheadline).frame(minHeight:44) }
+                if search.snapshot.phase.isBusy { Button(t("cancel")) { search.cancel() }.font(.subheadline).frame(minHeight:44) }
             }
-            if finder.busy {
-                ProgressView(t(finder.status)).font(.subheadline).foregroundStyle(palette.muted)
+            if search.snapshot.phase.isBusy {
+                ProgressView(t(status)).font(.subheadline).foregroundStyle(palette.muted)
             } else {
                 Text(statusText).font(.subheadline).foregroundStyle(palette.muted).accessibilityIdentifier("search-status")
             }
-            if ["error","denied","empty"].contains(finder.status) {
+            if ["error","denied","empty"].contains(status) {
                 VStack(alignment:.leading,spacing:8) {
-                    if finder.status == "error" {
-                        Button(t("retry")) { finder.retry() }.buttonStyle(NordicButton(palette:palette,primary:false))
+                    if status == "error" {
+                        Button(t("retry")) { search.retry() }.buttonStyle(NordicButton(palette:palette,primary:false))
                     }
                     Link(t("fallback"),destination:URL(string:"https://www.apteekki.fi/apteekkihaku")!).font(.subheadline.weight(.semibold)).frame(minHeight:44)
                 }
             }
-            if let result=finder.result, !result.pharmacies.isEmpty {
+            if let result=search.snapshot.result, !result.pharmacies.isEmpty {
                 DisclosureGroup(isExpanded:$resultDetailsExpanded) {
                     VStack(alignment:.leading,spacing:6) {
                         if let date = result.sourceDate { Text(t("catalogDate") + ": " + String(date.prefix(10))) }
@@ -217,9 +216,28 @@ import UIKit
         Button { selectedMap=pharmacy } label: { Label(t("mapHere"),systemImage:"map").font(.subheadline.weight(.semibold)).frame(minHeight:44) }
             .accessibilityLabel(t("mapHere")+": "+name).accessibilityHint(t("mapPrivacy"))
     }
+    /// Translation key for the current search phase.
+    private var status: String {
+        switch search.snapshot.phase {
+        case .idle: "idle"
+        case .locating: "locating"
+        case .loading: "loading"
+        case .found: "found"
+        case .empty: "empty"
+        case .denied: "denied"
+        case .failed: "error"
+        case .cancelled: "cancelled"
+        }
+    }
+    private var originName: String {
+        switch search.snapshot.origin {
+        case .city(let city): city.rawValue
+        case .device, nil: t("device")
+        }
+    }
     private var statusText: String {
-        guard finder.status == "found",let result=finder.result else { return t(finder.status) }
-        return "\(result.pharmacies.count) \(t("resultCount")) · \(finder.origin == "device" ? t("device") : finder.origin)"
+        guard status == "found",let result=search.snapshot.result else { return t(status) }
+        return "\(result.pharmacies.count) \(t("resultCount")) · \(originName)"
     }
     private func formattedDistance(_ meters:Double) -> String {
         let value=meters < 1000 ? Measurement(value:meters,unit:UnitLength.meters) : Measurement(value:meters/1000,unit:UnitLength.kilometers)
