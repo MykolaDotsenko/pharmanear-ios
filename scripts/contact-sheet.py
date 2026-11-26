@@ -11,7 +11,7 @@ from pathlib import Path
 from PIL import Image
 
 # Screens in reading order, by the name each UI test gives its screenshot.
-WANTED = ["Turku results", "Map preview", "Radar"]
+WANTED = ["Turku results", "Radar", "Largest text"]
 WIDTH = 200
 
 

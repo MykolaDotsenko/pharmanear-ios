@@ -13,13 +13,13 @@ affiliated with Treat Health and not medical advice. The web version is
   to two decimals and widening from 3 to 10 to 30 km.
 - Ranks by straight-line distance and shows up to 20 results (5 at first), with an in-app MapKit preview or
   _Open in Maps_ on request.
-- Shows community-mapped opening hours labelled as unverified; a few pharmacies whose hours were checked against
-  their own page show that date for ninety days. Rows without hours link to Apteekki.fi.
-- A _Radar_ button on every result opens a radar that points to that pharmacy in a straight line, from live GPS
-  and the compass. It
-  asks for location when opened if _Use my location_ has not, gives no direction while the pharmacy is within
-  the GPS uncertainty, keeps "near" at the door, works in landscape, and stops in the background. Nothing it
-  reads is stored or sent.
+- Shows community-mapped opening hours as _Opening hours (OpenStreetMap)_, with a notice that they can be out
+  of date; a few pharmacies whose hours were checked against their own page show that date for ninety days.
+  Rows without hours link to Apteekki.fi.
+- A _Radar_ button on every result opens a radar for that pharmacy alone, in a straight line from live GPS and
+  the compass: the distance and the way to turn first, then the dial. It asks for location when opened if
+  _Use my location_ has not, gives no direction while the pharmacy is within the GPS uncertainty, keeps "near"
+  at the door, works in landscape, and stops in the background. Nothing it reads is stored or sent.
 - English, Finnish and Swedish from String Catalogs, following the system or per-app language; Dynamic Type up
   to the accessibility sizes, VoiceOver, dark mode, Reduce Motion, and a quiet seasonal palette from
   25 November to 6 January.
@@ -85,9 +85,10 @@ For a physical iPhone, select your own signing team in Xcode.
 Every push runs the String Catalog check, swift-format in strict mode, the `PharmacyCore` tests (search rules,
 catalog policy, transport, and the search lifecycle including cancellation and superseded searches) and the
 XCUITest flows on an iPhone simulator (city search, result details, show more, the map sheet, the radar from a
-row, Finnish and Swedish, and Apple's accessibility audit). Screenshots from the UI tests are uploaded with every
-run; a manual run also captures the start screen in light, dark, Finnish and Swedish, and with _log_screenshots_
-prints a small contact sheet of them to the log for anyone who cannot download artifacts. [docs/review.md](docs/review.md) records what is verified and what still needs a person.
+row, Finnish and Swedish, the largest text size, and Apple's accessibility audit). Screenshots from the UI tests are uploaded with every
+run, the largest text size among them; a manual run also captures the start screen in light, dark, Finnish and
+Swedish, and with _log_screenshots_ prints a small contact sheet of them to the log, for reviewers who cannot
+download artifacts. [docs/review.md](docs/review.md) records what is verified and what still needs a person.
 
 ## Engineering process
 

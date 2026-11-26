@@ -2,10 +2,12 @@ import PharmacyCore
 import SwiftUI
 import UIKit
 
-/// A foreground-only orientation aid, separate from the one-shot search.
+/// A foreground-only orientation aid for one pharmacy, the one whose row opened it. It starts as it opens; the
+/// distance and the way to turn come first, then the dial with only that pharmacy on it.
 struct PharmacyRadarView: View {
+    /// The result set, used only to tell when every result is far away.
     let pharmacies: [Pharmacy]
-    @State private var target: Pharmacy
+    let target: Pharmacy
     @StateObject private var location = RadarLocation()
     @State private var guidance: RadarGuidance?
     @State private var announcer = RadarAnnouncer()
@@ -18,16 +20,10 @@ struct PharmacyRadarView: View {
 
     init(pharmacies: [Pharmacy], target: Pharmacy) {
         self.pharmacies = pharmacies
-        _target = State(initialValue: target)
+        self.target = target
     }
 
     private var palette: NordicPalette { NordicPalette(dark: colorScheme == .dark) }
-
-    /// The choices keep the search's order, so live fixes never reorder an open menu.
-    private var choices: [Pharmacy] {
-        let first = Array(pharmacies.prefix(8))
-        return first.contains { $0.id == target.id } ? first : first + [target]
-    }
 
     var body: some View {
         NavigationStack {
@@ -37,6 +33,10 @@ struct PharmacyRadarView: View {
             }
             .background(palette.paper)
             .foregroundStyle(palette.ink)
+            // The sheet's own bar, styled like the main screen's: pine actions on paper keep their contrast.
+            .tint(palette.pine)
+            .toolbarBackground(palette.paper, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
             .navigationTitle("Pharmacy radar")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -65,7 +65,6 @@ struct PharmacyRadarView: View {
         .onReceive(NotificationCenter.default.publisher(for: UIDevice.orientationDidChangeNotification)) { _ in
             location.updateOrientation()
         }
-        .onChange(of: target) { _ in guidance = nil }
     }
 
     @ViewBuilder
@@ -75,31 +74,33 @@ struct PharmacyRadarView: View {
             reading, target: target.point, nearestDistance: nearest, previous: guidance)
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                status(reading)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(verbatim: label(target))
+                        .font(.title3.weight(.semibold))
+                        .fixedSize(horizontal: false, vertical: true)
+                    status(reading)
+                        .font(.subheadline)
+                        .foregroundStyle(palette.muted)
+                }
                 if location.reducedAccuracy { preciseLocationNotice }
-                if let origin = reading.point, let current {
-                    chart(origin: origin, reading: reading, guidance: current)
-                    VStack(alignment: .leading, spacing: 4) {
+                // What to do comes first: the distance and the way to turn, then the dial.
+                if let current { readout(current) }
+                if !location.denied {
+                    chart(origin: reading.point, reading: reading, guidance: current)
+                        .frame(maxWidth: 360)
+                        .frame(maxWidth: .infinity)
+                }
+                VStack(alignment: .leading, spacing: 4) {
+                    if let current {
                         modeLabel(reading)
                         Text("GPS accuracy: \(formatted(reading.accuracy))")
                         Text("Radar range: \(formatted(current.range))")
                     }
-                    .font(.footnote)
-                    .foregroundStyle(palette.muted)
+                    Text("Straight-line direction only, not a walking route. Nothing is sent or stored.")
                 }
-                Text(verbatim: label(target))
-                    .font(.title2.weight(.semibold))
-                    .fixedSize(horizontal: false, vertical: true)
-                if !target.name.isEmpty && !target.address.isEmpty {
-                    Text(verbatim: target.address).fixedSize(horizontal: false, vertical: true)
-                }
-                if let current { readout(current) }
-                picker
-                Text("Straight-line direction only, not a walking route. Nothing is sent or stored.")
-                    .font(.footnote)
-                    .fixedSize(horizontal: false, vertical: true)
-                Link("Find a pharmacy on Apteekki.fi", destination: .pharmacyDirectory)
-                    .frame(minHeight: 44)
+                .font(.footnote)
+                .foregroundStyle(palette.muted)
+                .fixedSize(horizontal: false, vertical: true)
             }
             .frame(maxWidth: 620, alignment: .leading)
             .padding(20)
@@ -156,11 +157,12 @@ struct PharmacyRadarView: View {
                 .font(.caption)
                 .foregroundStyle(palette.muted)
             Text(verbatim: formatted(guidance.distance))
-                .font(.largeTitle)
+                .font(.largeTitle.weight(.bold))
                 .monospacedDigit()
             if let sector = guidance.sector {
                 Text(verbatim: direction(sector, relative: guidance.isRelative))
-                    .font(.title3.weight(.semibold))
+                    .font(.title2.weight(.semibold))
+                    .foregroundStyle(palette.pine)
             }
             if let note = noteText(guidance.note) {
                 Text(verbatim: note).fixedSize(horizontal: false, vertical: true)
@@ -168,36 +170,6 @@ struct PharmacyRadarView: View {
         }
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(.updatesFrequently)
-    }
-
-    private var picker: some View {
-        let labels = choiceLabels
-        return Picker(
-            "Choose pharmacy",
-            selection: Binding(
-                get: { target.id },
-                set: { id in
-                    if let pharmacy = pharmacies.first(where: { $0.id == id }) { target = pharmacy }
-                })
-        ) {
-            ForEach(choices) { pharmacy in
-                Text(verbatim: labels[pharmacy.id] ?? label(pharmacy)).tag(pharmacy.id)
-            }
-        }
-        .pickerStyle(.menu)
-    }
-
-    /// Choices that would read the same, such as unnamed pharmacies at one address, are numbered.
-    private var choiceLabels: [String: String] {
-        var seen: [String: Int] = [:]
-        var labels: [String: String] = [:]
-        for pharmacy in choices {
-            let text = label(pharmacy)
-            let count = (seen[text] ?? 0) + 1
-            seen[text] = count
-            labels[pharmacy.id] = count > 1 ? "\(text) (\(count))" : text
-        }
-        return labels
     }
 
     private func label(_ pharmacy: Pharmacy) -> String {
@@ -268,10 +240,11 @@ struct PharmacyRadarView: View {
         return labels[sector % 8]
     }
 
-    private func chart(origin: Point, reading: RadarReading, guidance: RadarGuidance) -> some View {
+    /// The dial: rings, north, you in the middle and, once there is a fix, the one pharmacy with its needle.
+    /// It shows at once, while the first fix is awaited, so the sheet does not jump when it arrives.
+    private func chart(origin: Point?, reading: RadarReading, guidance: RadarGuidance?) -> some View {
         // With Reduce Motion the chart does not turn with the phone.
         let heading = reduceMotion ? nil : reading.heading
-        let range = guidance.range
         return Canvas { context, size in
             let side = min(size.width, size.height)
             let center = CGPoint(x: size.width / 2, y: size.height / 2)
@@ -289,46 +262,37 @@ struct PharmacyRadarView: View {
             context.draw(
                 Text("N").font(.caption.weight(.semibold)).foregroundColor(.white),
                 at: CGPoint(x: center.x + side * 0.46 * sin(north), y: center.y - side * 0.46 * cos(north)))
-            context.fill(
-                circle(center, min(radius, radius * reading.accuracy / range)), with: .color(.cyan.opacity(0.2)))
-            var drawn: [CGPoint] = []
-            for pharmacy in [target] + choices.filter({ $0.id != target.id }) {
-                let selected = pharmacy.id == target.id
-                let meters = origin.distance(to: pharmacy.point)
-                guard selected || meters <= range else { continue }
-                let bearing = RadarGeometry.bearing(from: origin, to: pharmacy.point)
-                let projected = bearing.map {
+            if let origin, let guidance {
+                let range = guidance.range
+                context.fill(
+                    circle(center, min(radius, radius * reading.accuracy / range)), with: .color(.cyan.opacity(0.2)))
+                let meters = guidance.distance
+                let projected = RadarGeometry.bearing(from: origin, to: target.point).map {
                     RadarGeometry.project(bearing: $0, heading: heading, distance: meters, range: range)
                 }
                 let mark = projected.map { CGPoint(x: $0.lon * size.width, y: $0.lat * size.height) } ?? center
-                if !selected
-                    && (hypot(mark.x - center.x, mark.y - center.y) < 24
-                        || drawn.contains(where: { hypot(mark.x - $0.x, mark.y - $0.y) < 30 }))
-                {
-                    continue
-                }
-                drawn.append(mark)
-                if selected && guidance.sector != nil && hypot(mark.x - center.x, mark.y - center.y) > 18 {
+                if guidance.sector != nil && hypot(mark.x - center.x, mark.y - center.y) > 18 {
                     var line = Path()
                     line.move(to: center)
                     line.addLine(to: mark)
                     context.stroke(line, with: .color(.white), style: StrokeStyle(lineWidth: 2, dash: [4, 4]))
                 }
-                if selected && meters > range {
-                    // Beyond the range the target sits on the edge as a ring, never looking closer than it is.
-                    context.stroke(circle(mark, 13), with: .color(.green), lineWidth: 3)
+                let beyond = meters > range
+                if beyond {
+                    // Beyond the range the pharmacy sits on the edge as a ring, never looking closer than it is.
+                    context.stroke(circle(mark, 14), with: .color(.green), lineWidth: 3)
                 } else {
-                    context.fill(
-                        circle(mark, selected ? 14 : 10), with: .color(selected ? .green : .white.opacity(0.7)))
+                    context.fill(circle(mark, 15), with: .color(.green))
                 }
                 var cross = Path()
-                cross.move(to: CGPoint(x: mark.x - 4, y: mark.y))
-                cross.addLine(to: CGPoint(x: mark.x + 4, y: mark.y))
-                cross.move(to: CGPoint(x: mark.x, y: mark.y - 4))
-                cross.addLine(to: CGPoint(x: mark.x, y: mark.y + 4))
-                context.stroke(cross, with: .color(selected && meters > range ? .green : .black), lineWidth: 2)
+                cross.move(to: CGPoint(x: mark.x - 5, y: mark.y))
+                cross.addLine(to: CGPoint(x: mark.x + 5, y: mark.y))
+                cross.move(to: CGPoint(x: mark.x, y: mark.y - 5))
+                cross.addLine(to: CGPoint(x: mark.x, y: mark.y + 5))
+                context.stroke(cross, with: .color(beyond ? .green : .black), lineWidth: 2)
             }
-            context.fill(circle(center, 5), with: .color(.cyan))
+            // You, dimmed until the first fix.
+            context.fill(circle(center, 5), with: .color(.cyan.opacity(origin == nil ? 0.5 : 1)))
         }
         .aspectRatio(1, contentMode: .fit)
         .background(Color(red: 0.09, green: 0.23, blue: 0.2))
