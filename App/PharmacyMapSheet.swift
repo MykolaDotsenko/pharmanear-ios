@@ -1,32 +1,57 @@
+import MapKit
 import PharmacyCore
 import SwiftUI
-import MapKit
 
+/// An opt-in native map of one pharmacy. MapKit is created only when the sheet opens, and the user's
+/// own position is never shown or requested here.
 struct PharmacyMapSheet: View {
     let pharmacy: Pharmacy
-    let title: String
-    let close: String
-    let disclosure: String
-    let unnamed: String
+
     @Environment(\.dismiss) private var dismiss
     @State private var region: MKCoordinateRegion
-    init(pharmacy:Pharmacy,title:String,close:String,disclosure:String,unnamed:String) {
-        self.pharmacy=pharmacy;self.title=title;self.close=close;self.disclosure=disclosure;self.unnamed=unnamed
-        _region=State(initialValue:MKCoordinateRegion(center:CLLocationCoordinate2D(latitude:pharmacy.point.lat,longitude:pharmacy.point.lon),span:MKCoordinateSpan(latitudeDelta:0.018,longitudeDelta:0.025)))
+
+    init(pharmacy: Pharmacy) {
+        self.pharmacy = pharmacy
+        _region = State(
+            initialValue: MKCoordinateRegion(
+                center: pharmacy.coordinate,
+                span: MKCoordinateSpan(latitudeDelta: 0.018, longitudeDelta: 0.025)))
     }
+
+    private var name: String {
+        pharmacy.name.isEmpty ? String(localized: "Unnamed pharmacy") : pharmacy.name
+    }
+
     var body: some View {
         NavigationStack {
-            VStack(alignment:.leading,spacing:12) {
-                Text(pharmacy.name.isEmpty ? unnamed : pharmacy.name).font(.headline)
-                Text(disclosure).font(.footnote).foregroundStyle(.secondary)
-                Map(coordinateRegion:$region,showsUserLocation:false,annotationItems:[pharmacy]) { p in
-                    MapMarker(coordinate:CLLocationCoordinate2D(latitude:p.point.lat,longitude:p.point.lon),tint:.green)
+            VStack(alignment: .leading, spacing: 12) {
+                Text(name).font(.headline)
+                Text("MapKit loads this pharmacy location; Apple receives network metadata.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                Map(coordinateRegion: $region, showsUserLocation: false, annotationItems: [pharmacy]) { pharmacy in
+                    MapMarker(coordinate: pharmacy.coordinate, tint: .green)
                 }
-                .accessibilityLabel(title+" "+(pharmacy.name.isEmpty ? unnamed : pharmacy.name))
-                .frame(maxWidth:.infinity,maxHeight:.infinity)
-                if !pharmacy.address.isEmpty { Text(pharmacy.address).font(.subheadline) }
-            }.padding().navigationTitle(title).navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement:.cancellationAction) { Button(close) { dismiss() } } }
+                .accessibilityLabel(Text("Map of \(name)"))
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                if !pharmacy.address.isEmpty {
+                    Text(pharmacy.address).font(.subheadline)
+                }
+            }
+            .padding()
+            .navigationTitle("Pharmacy map")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Close map") { dismiss() }
+                }
+            }
         }
+    }
+}
+
+extension Pharmacy {
+    var coordinate: CLLocationCoordinate2D {
+        CLLocationCoordinate2D(latitude: point.lat, longitude: point.lon)
     }
 }

@@ -8,9 +8,13 @@ permissions:
 jobs:
   test-and-build:
     runs-on: macos-15
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+      - name: Check String Catalogs against the app
+        run: python3 scripts/check-strings.py
+      - name: Check Swift formatting
+        run: xcrun swift-format lint --strict --recursive Package.swift Sources Tests App
       - run: swift test
       - run: xcodebuild -project PharmaNear.xcodeproj -scheme PharmaNear -configuration Debug -destination 'generic/platform=iOS Simulator' -derivedDataPath "$RUNNER_TEMP/pharmanear-build" CODE_SIGNING_ALLOWED=NO build
       - name: Launch simulator and capture UI evidence
@@ -23,16 +27,27 @@ jobs:
           xcrun simctl boot "$DEVICE" || true
           xcrun simctl bootstatus "$DEVICE" -b
           APP="$RUNNER_TEMP/pharmanear-build/Build/Products/Debug-iphonesimulator/PharmaNear.app"
+          BUNDLE=com.mykoladotsenko.pharmanear
           xcrun simctl install "$DEVICE" "$APP"
           xcrun simctl status_bar "$DEVICE" override --time "9:41" --dataNetwork wifi --wifiMode active --wifiBars 3 --cellularMode active --cellularBars 4 --batteryState discharging --batteryLevel 100
           mkdir -p ui-evidence
           xcrun simctl ui "$DEVICE" appearance light
-          xcrun simctl launch "$DEVICE" com.mykoladotsenko.pharmanear
+          xcrun simctl launch "$DEVICE" "$BUNDLE"
           sleep 3
           xcrun simctl io "$DEVICE" screenshot ui-evidence/iphone-light.png
           xcrun simctl ui "$DEVICE" appearance dark
           sleep 2
           xcrun simctl io "$DEVICE" screenshot ui-evidence/iphone-dark.png
+          # The app follows the system language; launch arguments select one without changing the device.
+          xcrun simctl terminate "$DEVICE" "$BUNDLE"
+          xcrun simctl ui "$DEVICE" appearance light
+          xcrun simctl launch "$DEVICE" "$BUNDLE" -AppleLanguages "(fi)" -AppleLocale fi_FI
+          sleep 3
+          xcrun simctl io "$DEVICE" screenshot ui-evidence/iphone-finnish.png
+          xcrun simctl terminate "$DEVICE" "$BUNDLE"
+          xcrun simctl launch "$DEVICE" "$BUNDLE" -AppleLanguages "(sv)" -AppleLocale sv_FI
+          sleep 3
+          xcrun simctl io "$DEVICE" screenshot ui-evidence/iphone-swedish.png
       - uses: actions/upload-artifact@v4
         if: always() && github.event_name == 'workflow_dispatch'
         with:

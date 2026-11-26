@@ -1,0 +1,29 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "NSLocationWhenInUseUsageDescription" : {
+      "comment" : "Location permission prompt.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Find nearby pharmacies using your location only when you request it."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Etsi lähimmät apteekit sijaintisi avulla vain silloin, kun pyydät sitä."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hitta närliggande apotek med din plats bara när du ber om det."
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

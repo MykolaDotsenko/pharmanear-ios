@@ -1,7 +1,10 @@
 import SwiftUI
 
-@main struct PharmaNearApp: App {
+@main
+struct PharmaNearApp: App {
     var body: some Scene {
-        WindowGroup { ContentView() }
+        WindowGroup {
+            ContentView()
+        }
     }
 }
