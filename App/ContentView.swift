@@ -6,6 +6,8 @@ import UIKit
 struct ContentView: View {
     @StateObject private var search = SearchSession.makeForApp()
     @State private var mappedPharmacy: Pharmacy?
+    @State private var radarPharmacies: [Pharmacy] = []
+    @State private var showsRadar = false
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.openURL) private var openURL
@@ -29,7 +31,11 @@ struct ContentView: View {
                         ResultsSection(
                             snapshot: search.snapshot, palette: palette,
                             cancel: { search.cancel() }, retry: { search.retry() },
-                            showMap: { mappedPharmacy = $0 }
+                            showMap: { mappedPharmacy = $0 },
+                            showRadar: { pharmacies in
+                                radarPharmacies = pharmacies
+                                showsRadar = true
+                            }
                         )
                         .id(Self.resultsID)
                         footer
@@ -62,6 +68,11 @@ struct ContentView: View {
             }
         }
         .sheet(item: $mappedPharmacy) { PharmacyMapSheet(pharmacy: $0) }
+        .sheet(isPresented: $showsRadar) {
+            if let target = radarPharmacies.first {
+                PharmacyRadarView(pharmacies: radarPharmacies, target: target)
+            }
+        }
     }
 
     /// The app follows the system language. iOS offers a language per app in Settings once more than one
