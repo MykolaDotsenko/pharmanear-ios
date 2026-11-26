@@ -37,6 +37,16 @@ public enum RadarGeometry {
         return Point(lat: 0.5 - radius * cos(angle), lon: 0.5 + radius * sin(angle))
     }
 
+    /// The eighth of a turn an angle falls in (0 is ahead or north, 2 is right or east). The previous sector is
+    /// kept until the angle is `hysteresis` degrees past its edge, so a label does not flicker at a boundary.
+    public static func sector(_ angle: Double, previous: Int? = nil, hysteresis: Double = 8) -> Int {
+        let value = degrees(angle)
+        let nearest = Int((value / 45).rounded()) % 8
+        guard let previous, previous != nearest, (0..<8).contains(previous) else { return nearest }
+        let offset = abs(degrees(value - Double(previous) * 45 + 180) - 180)
+        return offset <= 22.5 + hysteresis ? previous : nearest
+    }
+
     public static func isNear(distance: Double, accuracy: Double, wasNear: Bool = false) -> Bool {
         let limit = wasNear ? 40.0 : 30.0
         return distance.isFinite && accuracy.isFinite && distance >= 0 && accuracy >= 0

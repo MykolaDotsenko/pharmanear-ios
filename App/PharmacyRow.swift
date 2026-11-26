@@ -12,36 +12,18 @@ struct PharmacyRow: View {
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
-    private struct Review {
-        let name: String
-        let point: Point
-        let address: String
-        let hours: String
-        let url: URL
-    }
-
-    // A dated source comparison, not a live opening-status feed.
-    private var reviewed: Review? {
-        let record: Review
-        switch pharmacy.id {
-        case "node/1369465698":
-            record = Review(
-                name: "Yliopiston apteekki", point: Point(lat: 60.169575, lon: 24.939536),
-                address: "Mannerheimintie 5, Helsinki", hours: "08:00-24:00",
-                url: URL(string: "https://www.yliopistonapteekki.fi/yhteystiedot/helsinki-keskusta")!)
-        case "node/11771777459":
-            record = Review(
-                name: "Apteekki CityCenter", point: Point(lat: 60.170001, lon: 24.941615),
-                address: "Kaivokatu 8, Helsinki", hours: "Mo-Fr 08:00-19:00; Sa 10:00-17:00; Su off",
-                url: URL(string: "https://citycenter.fi/liikkeet/apteekki-citycenter/")!)
-        default:
-            return nil
-        }
-        return pharmacy.name == record.name && pharmacy.point.distance(to: record.point) <= 15 ? record : nil
-    }
+    /// A hand-checked source, which vouches for the hours only while they match and the check is recent.
+    private var source: CheckedSource? { CheckedSources.source(for: pharmacy) }
 
     private var displayAddress: String {
-        pharmacy.address.isEmpty ? reviewed?.address ?? "" : pharmacy.address
+        pharmacy.address.isEmpty ? source?.address ?? "" : pharmacy.address
+    }
+
+    /// The check date in UTC, the day it was made wherever the reader is.
+    private func day(_ date: Date) -> String {
+        var style = Date.FormatStyle(date: .long, time: .omitted)
+        style.timeZone = TimeZone(identifier: "UTC") ?? .current
+        return date.formatted(style)
     }
 
     private var isNearest: Bool { rank == 1 }
@@ -60,20 +42,22 @@ struct PharmacyRow: View {
                 details
                 Spacer(minLength: 0)
             }
-            if let reviewed {
-                Link(destination: reviewed.url) {
-                    if pharmacy.hours == reviewed.hours {
-                        Text("Source checked: 26 November 2026")
-                    } else {
-                        Text("Pharmacy details")
-                    }
-                }
-                .font(.footnote)
-                .frame(minHeight: 44)
-            } else if pharmacy.hours.isEmpty {
-                Link("Check opening hours", destination: .pharmacyDirectory)
+            // Each row repeats these links, so their accessible names carry the pharmacy's name.
+            if let source, let checked = source.checked {
+                Link(destination: source.url) { Text("Source checked: \(day(checked))") }
                     .font(.footnote)
                     .frame(minHeight: 44)
+                    .accessibilityLabel(Text("Source checked \(day(checked)): \(name)"))
+            } else if let source {
+                Link(destination: source.url) { Text("Pharmacy details") }
+                    .font(.footnote)
+                    .frame(minHeight: 44)
+                    .accessibilityLabel(Text("Pharmacy details: \(name)"))
+            } else if pharmacy.hours.isEmpty {
+                Link(destination: .pharmacyDirectory) { Text("Check opening hours") }
+                    .font(.footnote)
+                    .frame(minHeight: 44)
+                    .accessibilityLabel(Text("Check opening hours: \(name)"))
             }
             VStack(alignment: .leading, spacing: 6) {
                 Text(distance)
@@ -105,15 +89,18 @@ struct PharmacyRow: View {
             Text(name)
                 .font(isNearest ? .title3.weight(.semibold) : .headline)
                 .fixedSize(horizontal: false, vertical: true)
+            // Every line may wrap instead of truncating, so Dynamic Type sizes stay fully supported.
             if !displayAddress.isEmpty {
                 Text(displayAddress)
                     .font(.subheadline)
                     .foregroundStyle(palette.muted)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             if displayAddress.isEmpty && !pharmacy.name.isEmpty {
                 Text("Address not listed")
                     .font(.footnote)
                     .foregroundStyle(palette.muted)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             if pharmacy.name.isEmpty {
                 Text(
@@ -121,20 +108,31 @@ struct PharmacyRow: View {
                         ? String(localized: "Possible duplicate map entry; identity not confirmed.")
                         : String(localized: "Incomplete map entry; confirm the pharmacy before travelling.")
                 )
-                    .font(.footnote)
-                    .foregroundStyle(palette.muted)
+                .font(.footnote)
+                .foregroundStyle(palette.muted)
+                .fixedSize(horizontal: false, vertical: true)
             }
             if pharmacy.hours.isEmpty {
                 Text("Opening hours unavailable")
                     .font(.footnote)
                     .foregroundStyle(palette.muted)
+                    .fixedSize(horizontal: false, vertical: true)
             } else {
-                Text("Opening hours")
-                    .font(.caption)
-                    .foregroundStyle(palette.muted)
+                // Mapped hours are unverified; only hours matching a recent check drop the qualifier.
+                Group {
+                    if source?.checked != nil {
+                        Text("Opening hours")
+                    } else {
+                        Text("Mapped hours (unverified)")
+                    }
+                }
+                .font(.caption)
+                .foregroundStyle(palette.muted)
+                .fixedSize(horizontal: false, vertical: true)
                 Text(readableHours)
                     .font(.footnote)
                     .monospacedDigit()
+                    .fixedSize(horizontal: false, vertical: true)
             }
         }
         .accessibilityElement(children: .combine)

@@ -282,6 +282,29 @@
         }
       }
     },
+    "Check opening hours: %@" : {
+      "comment" : "VoiceOver name of the Apteekki.fi link on a row without hours; %@ is the pharmacy's name.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Check opening hours: %@"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tarkista aukioloajat: %@"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kontrollera öppettider: %@"
+          }
+        }
+      }
+    },
     "Choose pharmacy" : {
       "localizations" : {
         "en" : {
@@ -426,13 +449,36 @@
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kompassisuunta"
+            "value" : "Kompassisuunta ylös"
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kompassriktning"
+            "value" : "Kompassriktning uppåt"
+          }
+        }
+      }
+    },
+    "Confirm before travelling." : {
+      "comment" : "Second sentence of the notice above the results.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Confirm before travelling."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tarkista ennen lähtöä."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kontrollera före avfärd."
           }
         }
       }
@@ -905,6 +951,52 @@
         }
       }
     },
+    "Mapped hours (unverified)" : {
+      "comment" : "Label above a pharmacy's opening hours taken from OpenStreetMap; they are not verified.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mapped hours (unverified)"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Karttaan merkityt aukioloajat (vahvistamatta)"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kartlagda öppettider (ej bekräftade)"
+          }
+        }
+      }
+    },
+    "N" : {
+      "comment" : "One letter for north on the radar chart.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "N"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "P"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "N"
+          }
+        }
+      }
+    },
     "Near the mapped pharmacy. Look for its entrance." : {
       "localizations" : {
         "en" : {
@@ -1129,6 +1221,29 @@
         }
       }
     },
+    "Open Settings" : {
+      "comment" : "Button that opens this app's page in the Settings app.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Settings"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avaa Asetukset"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öppna Inställningar"
+          }
+        }
+      }
+    },
     "Opening hours" : {
       "localizations" : {
         "en" : {
@@ -1151,24 +1266,25 @@
         }
       }
     },
-    "Opening hours are from OpenStreetMap unless a checked source is shown. Confirm before travelling." : {
+    "Opening hours come from OpenStreetMap and are unverified unless a checked source is shown." : {
+      "comment" : "Notice above the results.",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Opening hours are from OpenStreetMap unless a checked source is shown. Confirm before travelling."
+            "value" : "Opening hours come from OpenStreetMap and are unverified unless a checked source is shown."
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aukioloajat ovat OpenStreetMapista, ellei tarkistettua lähdettä ole merkitty. Tarkista ne ennen lähtöä."
+            "value" : "Aukioloajat ovat OpenStreetMapista eikä niitä ole vahvistettu, ellei tarkistettua lähdettä ole merkitty."
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Öppettider kommer från OpenStreetMap om ingen kontrollerad källa anges. Kontrollera dem före avfärd."
+            "value" : "Öppettiderna kommer från OpenStreetMap och är inte bekräftade om ingen kontrollerad källa anges."
           }
         }
       }
@@ -1264,28 +1380,6 @@
         }
       }
     },
-    "Pharmacy — name unavailable" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pharmacy — name unavailable"
-          }
-        },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Apteekki — nimi puuttuu"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Apotek — namn saknas"
-          }
-        }
-      }
-    },
     "Pharmacy details" : {
       "localizations" : {
         "en" : {
@@ -1304,6 +1398,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Apoteksuppgifter"
+          }
+        }
+      }
+    },
+    "Pharmacy details: %@" : {
+      "comment" : "VoiceOver name of the link to a pharmacy's own page; %@ is the pharmacy's name.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pharmacy details: %@"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apteekin tiedot: %@"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apoteksuppgifter: %@"
           }
         }
       }
@@ -1376,6 +1493,28 @@
         }
       }
     },
+    "Pharmacy — name unavailable" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pharmacy — name unavailable"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apteekki — nimi puuttuu"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apotek — namn saknas"
+          }
+        }
+      }
+    },
     "Possible duplicate map entry; identity not confirmed." : {
       "localizations" : {
         "en" : {
@@ -1394,6 +1533,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Möjlig dubblett i kartan; identiteten är inte bekräftad."
+          }
+        }
+      }
+    },
+    "Precise Location is off, so the radar cannot point the way." : {
+      "comment" : "Radar notice when the user allowed only approximate location. Precise Location is the iOS setting's name.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Precise Location is off, so the radar cannot point the way."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tarkka sijainti on pois päältä, joten tutka ei voi näyttää suuntaa."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exakt plats är avstängd, så radarn kan inte visa vägen."
           }
         }
       }
@@ -1663,24 +1825,48 @@
         }
       }
     },
-    "Source checked: 26 November 2026" : {
+    "Source checked %@: %@" : {
+      "comment" : "VoiceOver name of the checked-source link: the check date, then the pharmacy's name.",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Source checked: 26 November 2026"
+            "value" : "Source checked %@: %@"
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Lähde tarkistettu 26.11.2026"
+            "value" : "Lähde tarkistettu %@: %@"
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Källa kontrollerad 26 november 2026"
+            "value" : "Källa kontrollerad %@: %@"
+          }
+        }
+      }
+    },
+    "Source checked: %@" : {
+      "comment" : "Link to a pharmacy's own page; %@ is the date its hours were checked against the map.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Source checked: %@"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lähde tarkistettu: %@"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Källa kontrollerad: %@"
           }
         }
       }
@@ -1751,24 +1937,48 @@
         }
       }
     },
-    "Straight-line direction only, not a walking route. Live location stays on this device." : {
+    "Straight-line direction only, not a walking route. Nothing is sent or stored." : {
+      "comment" : "Radar disclaimer.",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Straight-line direction only, not a walking route. Live location stays on this device."
+            "value" : "Straight-line direction only, not a walking route. Nothing is sent or stored."
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Suunta linnuntietä, ei kävelyreitti. Sijainti pysyy laitteellasi."
+            "value" : "Suunta linnuntietä, ei kävelyreitti. Mitään ei lähetetä eikä tallenneta."
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Riktning fågelvägen, inte en gångväg. Din position stannar på enheten."
+            "value" : "Riktning fågelvägen, inte en gångväg. Inget skickas eller sparas."
+          }
+        }
+      }
+    },
+    "Straight-line distance" : {
+      "comment" : "Caption above the radar's distance to the pharmacy.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Straight-line distance"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Etäisyys linnuntietä"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avstånd fågelvägen"
           }
         }
       }
@@ -1818,24 +2028,48 @@
         }
       }
     },
-    "The pharmacy is within GPS uncertainty." : {
+    "The pharmacy is within GPS uncertainty, so no direction is shown." : {
+      "comment" : "Radar note when the pharmacy is closer than the GPS accuracy.",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "The pharmacy is within GPS uncertainty."
+            "value" : "The pharmacy is within GPS uncertainty, so no direction is shown."
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Apteekki on GPS-epävarmuusalueella."
+            "value" : "Apteekki on GPS-epävarmuusalueella, joten suuntaa ei näytetä."
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Apoteket ligger inom GPS-osäkerheten."
+            "value" : "Apoteket ligger inom GPS-osäkerheten, så ingen riktning visas."
+          }
+        }
+      }
+    },
+    "These results are far from you. Search from your location instead." : {
+      "comment" : "Radar note when the results were searched for a city far from the user.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "These results are far from you. Search from your location instead."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tulokset ovat kaukana sinusta. Hae mieluummin sijaintisi perusteella."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resultaten ligger långt från dig. Sök hellre från din position."
           }
         }
       }
@@ -1881,6 +2115,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Åbo"
+          }
+        }
+      }
+    },
+    "Turn it on for PharmaNear in Settings." : {
+      "comment" : "Follows the Precise Location notice.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn it on for PharmaNear in Settings."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ota se käyttöön PharmaNearille Asetuksissa."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Slå på den för PharmaNear i Inställningar."
           }
         }
       }

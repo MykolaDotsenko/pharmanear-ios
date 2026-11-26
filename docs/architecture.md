@@ -10,6 +10,8 @@ App (SwiftUI, Core Location, MapKit)          PharmacyCore (Foundation; Combine 
   ContentView ──► SearchSession ◄──────────────  SearchSession, SearchPhase, LocationProviding
   DeviceLocation ─ implements LocationProviding   PharmacyCatalog ──► OverpassClient
   SearchHeader, ResultsSection, PharmacyRow       Core: Point, City, Pharmacy, ranking, coverage
+  PharmacyRadarView ──► RadarLocation ─────────►  RadarTracker, RadarGuidance, RadarAnnouncer, RadarGeometry
+                                                  CheckedSources
 ```
 
 - **`PharmacyCore`** has no SwiftUI, UIKit, Core Location or MapKit imports, so all of its behaviour is tested
@@ -32,6 +34,21 @@ App (SwiftUI, Core Location, MapKit)          PharmacyCore (Foundation; Combine 
   an earlier request cannot end a newer one.
 - **`PharmacyCatalog`** is an actor: it decodes the bundled snapshot once, caches a refreshed snapshot, and
   serializes refresh decisions without locks. Download, live search and the clock are injected for tests.
+- **`CheckedSources`** holds manually checked pages for a few pharmacies. A check applies only while the
+  mapped name, position and hours still match it, and vouches for the hours for ninety days; after that the row
+  keeps only the link. Mapped hours are otherwise labelled unverified.
+- **The radar** keeps its rules in `PharmacyCore`, tested on Linux, and only the sensors in the app.
+  `RadarTracker` decides which fixes count (none older than 15 s, none invalid), when a fix is stale (read at
+  the moment, so no timers), and what turns the chart: the compass while it is better than ±30°, used as
+  delivered so it never lags after a turn; otherwise the direction of travel; otherwise north-up.
+  `RadarGuidance` names a direction only for a live fix outside the GPS uncertainty, with hysteresis at each
+  eighth of a turn; keeps "near" on a stale fix, since someone at the door gets none; and says when the results
+  are far away. `RadarAnnouncer` lets VoiceOver hear a new target, note or clear change in distance, and a new
+  direction at most every eight seconds. `RadarLocation` feeds it from `CLLocationManager` with every fix and
+  a heading filter of 1°, sets `headingOrientation` from the interface orientation, treats only a denial as
+  final and a heading failure as a fall-back to north-up, and reports approximate location. The radar stops
+  only in the background, since the permission prompt makes the app inactive; it keeps the screen on while a
+  fix is live and restores the idle timer afterwards. With Reduce Motion the chart stays north-up.
 - **Views** receive values and closures, not the session: `SearchHeader` needs only whether the app is idle and
   two actions; `ResultsSection` renders a snapshot. There is no global store, service locator or persistence of
   coordinates.

@@ -6,8 +6,7 @@ import UIKit
 struct ContentView: View {
     @StateObject private var search = SearchSession.makeForApp()
     @State private var mappedPharmacy: Pharmacy?
-    @State private var radarPharmacies: [Pharmacy] = []
-    @State private var showsRadar = false
+    @State private var radar: RadarRequest?
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.openURL) private var openURL
@@ -33,8 +32,9 @@ struct ContentView: View {
                             cancel: { search.cancel() }, retry: { search.retry() },
                             showMap: { mappedPharmacy = $0 },
                             showRadar: { pharmacies in
-                                radarPharmacies = pharmacies
-                                showsRadar = true
+                                if let target = pharmacies.first {
+                                    radar = RadarRequest(pharmacies: pharmacies, target: target)
+                                }
                             }
                         )
                         .id(Self.resultsID)
@@ -68,11 +68,7 @@ struct ContentView: View {
             }
         }
         .sheet(item: $mappedPharmacy) { PharmacyMapSheet(pharmacy: $0) }
-        .sheet(isPresented: $showsRadar) {
-            if let target = radarPharmacies.first {
-                PharmacyRadarView(pharmacies: radarPharmacies, target: target)
-            }
-        }
+        .sheet(item: $radar) { PharmacyRadarView(pharmacies: $0.pharmacies, target: $0.target) }
     }
 
     /// The app follows the system language. iOS offers a language per app in Settings once more than one
@@ -118,4 +114,11 @@ extension URL {
     /// The Association of Finnish Pharmacies' directory, the authoritative source for opening hours.
     static let pharmacyDirectory = URL(string: "https://www.apteekki.fi/apteekkihaku")!
     static let openStreetMapCopyright = URL(string: "https://www.openstreetmap.org/copyright")!
+}
+
+/// One opening of the radar: the results to show and the pharmacy to point to.
+private struct RadarRequest: Identifiable {
+    let id = UUID()
+    let pharmacies: [Pharmacy]
+    let target: Pharmacy
 }

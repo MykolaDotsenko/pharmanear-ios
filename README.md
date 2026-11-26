@@ -13,7 +13,12 @@ affiliated with Treat Health and not medical advice. The web version is
   to two decimals and widening from 3 to 10 to 30 km.
 - Ranks by straight-line distance and shows up to 20 results (5 at first), with an in-app MapKit preview or
   _Open in Maps_ on request.
-- Shows community-mapped opening hours, always labelled as unverified, and links to Apteekki.fi.
+- Shows community-mapped opening hours labelled as unverified; a few pharmacies whose hours were checked against
+  their own page show that date for ninety days. Rows without hours link to Apteekki.fi.
+- An optional pharmacy radar points to a chosen result in a straight line from live GPS and the compass. It
+  asks for location when opened if _Use my location_ has not, gives no direction while the pharmacy is within
+  the GPS uncertainty, keeps "near" at the door, works in landscape, and stops in the background. Nothing it
+  reads is stored or sent.
 - English, Finnish and Swedish from String Catalogs, following the system or per-app language; Dynamic Type up
   to the accessibility sizes, VoiceOver, dark mode, Reduce Motion, and a quiet seasonal palette from
   25 November to 6 January.

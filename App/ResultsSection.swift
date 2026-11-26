@@ -39,9 +39,13 @@ struct ResultsSection: View {
                 Button("Pharmacy radar") { showRadar(result.pharmacies) }
                     .buttonStyle(NordicButton(palette: palette, primary: false))
                     .accessibilityIdentifier("open-radar")
-                Text("Opening hours are from OpenStreetMap unless a checked source is shown. Confirm before travelling.")
-                    .font(.footnote)
-                    .foregroundStyle(palette.muted)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Opening hours come from OpenStreetMap and are unverified unless a checked source is shown.")
+                    Text("Confirm before travelling.")
+                }
+                .font(.footnote)
+                .foregroundStyle(palette.muted)
+                .fixedSize(horizontal: false, vertical: true)
                 list(of: result)
             }
         }
