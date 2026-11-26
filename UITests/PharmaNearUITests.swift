@@ -2,27 +2,20 @@ import XCTest
 
 /// End-to-end flows on a simulator. The app reads its bundled catalog as of a fixed date and uses no network,
 /// so every run sees the same real pharmacies.
+@MainActor
 final class PharmaNearUITests: XCTestCase {
-    private var app: XCUIApplication!
-
-    override func setUpWithError() throws {
-        continueAfterFailure = false
-        app = XCUIApplication()
-        app.launchEnvironment["PHARMANEAR_CATALOG_DATE"] = "2026-11-26T12:00:00Z"
-    }
-
     func testCitySearchListsTheNearestMappedPharmacyFirst() {
-        launch()
-        searchFromCity(expecting: "44 mapped pharmacies · Turku")
+        let app = launch()
+        searchFromCity(in: app, expecting: "44 mapped pharmacies · Turku")
 
         let previews = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Map preview: "))
         XCTAssertEqual(previews.firstMatch.label, "Map preview: Yliopiston Apteekki")
-        attachScreenshot("Turku results")
+        attachScreenshot(of: app, named: "Turku results")
     }
 
     func testResultDetailsShowTheCatalogDateAndScope() {
-        launch()
-        searchFromCity(expecting: "44 mapped pharmacies · Turku")
+        let app = launch()
+        searchFromCity(in: app, expecting: "44 mapped pharmacies · Turku")
 
         app.buttons["About these results"].tap()
         XCTAssertTrue(app.staticTexts["OSM catalog date: 2026-11-24"].waitForExistence(timeout: 5))
@@ -31,8 +24,8 @@ final class PharmaNearUITests: XCTestCase {
     }
 
     func testShowMoreExpandsAndCollapsesTheList() {
-        launch()
-        searchFromCity(expecting: "44 mapped pharmacies · Turku")
+        let app = launch()
+        searchFromCity(in: app, expecting: "44 mapped pharmacies · Turku")
 
         let toggle = app.buttons["show-more"]
         XCTAssertEqual(toggle.label, "Show more pharmacies")
@@ -43,47 +36,51 @@ final class PharmaNearUITests: XCTestCase {
     }
 
     func testMapPreviewOpensAndClosesTheSheet() {
-        launch()
-        searchFromCity(expecting: "44 mapped pharmacies · Turku")
+        let app = launch()
+        searchFromCity(in: app, expecting: "44 mapped pharmacies · Turku")
 
         app.buttons["Map preview: Yliopiston Apteekki"].tap()
         let sheet = app.navigationBars["Pharmacy map"]
         XCTAssertTrue(sheet.waitForExistence(timeout: 5))
-        attachScreenshot("Map preview")
+        attachScreenshot(of: app, named: "Map preview")
         sheet.buttons["Close map"].tap()
-        XCTAssertTrue(sheet.waitForNonExistence(within: 5))
+        XCTAssertTrue(disappears(sheet))
     }
 
     func testFinnishCopyAndPluralForms() {
-        launch(language: "fi")
+        let app = launch(language: "fi")
         XCTAssertTrue(app.staticTexts["Löydä apteekki läheltäsi."].waitForExistence(timeout: 5))
-        searchFromCity(expecting: "44 kartoitettua apteekkia · Turku")
-        attachScreenshot("Finnish results")
+        searchFromCity(in: app, expecting: "44 kartoitettua apteekkia · Turku")
+        attachScreenshot(of: app, named: "Finnish results")
     }
 
     func testSwedishUsesOfficialCityNames() {
-        launch(language: "sv")
-        searchFromCity(expecting: "44 kartlagda apotek · Åbo")
-        attachScreenshot("Swedish results")
+        let app = launch(language: "sv")
+        searchFromCity(in: app, expecting: "44 kartlagda apotek · Åbo")
+        attachScreenshot(of: app, named: "Swedish results")
     }
 
     func testStartAndResultScreensPassTheAccessibilityAudit() throws {
         guard #available(iOS 17.0, *) else { throw XCTSkip("Accessibility audits need iOS 17 or later.") }
-        launch()
+        let app = launch()
         try app.performAccessibilityAudit()
-        searchFromCity(expecting: "44 mapped pharmacies · Turku")
+        searchFromCity(in: app, expecting: "44 mapped pharmacies · Turku")
         try app.performAccessibilityAudit()
     }
 
     // MARK: Helpers
 
-    private func launch(language: String = "en") {
+    private func launch(language: String = "en") -> XCUIApplication {
+        continueAfterFailure = false
+        let app = XCUIApplication()
+        app.launchEnvironment["PHARMANEAR_CATALOG_DATE"] = "2026-11-26T12:00:00Z"
         app.launchArguments += ["-AppleLanguages", "(\(language))", "-AppleLocale", "\(language)_FI"]
         app.launch()
+        return app
     }
 
     /// Searches from the default city and waits until the status line reads `status`.
-    private func searchFromCity(expecting status: String) {
+    private func searchFromCity(in app: XCUIApplication, expecting status: String) {
         app.buttons["city-search"].tap()
         let line = app.staticTexts["search-status"]
         let expectation = XCTNSPredicateExpectation(predicate: NSPredicate(format: "label == %@", status), object: line)
@@ -91,17 +88,15 @@ final class PharmaNearUITests: XCTestCase {
         XCTAssertEqual(result, .completed, "The status reads “\(line.label)” instead of “\(status)”")
     }
 
-    private func attachScreenshot(_ name: String) {
+    private func disappears(_ element: XCUIElement) -> Bool {
+        let expectation = XCTNSPredicateExpectation(predicate: NSPredicate(format: "exists == false"), object: element)
+        return XCTWaiter.wait(for: [expectation], timeout: 5) == .completed
+    }
+
+    private func attachScreenshot(of app: XCUIApplication, named name: String) {
         let attachment = XCTAttachment(screenshot: app.screenshot())
         attachment.name = name
         attachment.lifetime = .keepAlways
         add(attachment)
-    }
-}
-
-extension XCUIElement {
-    fileprivate func waitForNonExistence(within timeout: TimeInterval) -> Bool {
-        let expectation = XCTNSPredicateExpectation(predicate: NSPredicate(format: "exists == false"), object: self)
-        return XCTWaiter.wait(for: [expectation], timeout: timeout) == .completed
     }
 }
