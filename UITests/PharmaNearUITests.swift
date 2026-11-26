@@ -30,9 +30,11 @@ final class PharmaNearUITests: XCTestCase {
         let toggle = app.buttons["show-more"]
         XCTAssertEqual(toggle.label, "Show more pharmacies")
         toggle.tap()
-        XCTAssertEqual(toggle.label, "Show fewer pharmacies")
+        wait(for: toggle, toRead: "Show fewer pharmacies")
+        // Twenty rows push the button below the fold.
+        scrollIntoView(toggle, in: app)
         toggle.tap()
-        XCTAssertEqual(toggle.label, "Show more pharmacies")
+        wait(for: toggle, toRead: "Show more pharmacies")
     }
 
     func testMapPreviewOpensAndClosesTheSheet() {
@@ -63,9 +65,9 @@ final class PharmaNearUITests: XCTestCase {
     func testStartAndResultScreensPassTheAccessibilityAudit() throws {
         guard #available(iOS 17.0, *) else { throw XCTSkip("Accessibility audits need iOS 17 or later.") }
         let app = launch()
-        try app.performAccessibilityAudit()
+        try audit(app)
         searchFromCity(in: app, expecting: "44 mapped pharmacies · Turku")
-        try app.performAccessibilityAudit()
+        try audit(app)
     }
 
     // MARK: Helpers
@@ -82,10 +84,37 @@ final class PharmaNearUITests: XCTestCase {
     /// Searches from the default city and waits until the status line reads `status`.
     private func searchFromCity(in app: XCUIApplication, expecting status: String) {
         app.buttons["city-search"].tap()
-        let line = app.staticTexts["search-status"]
-        let expectation = XCTNSPredicateExpectation(predicate: NSPredicate(format: "label == %@", status), object: line)
+        wait(for: app.staticTexts["search-status"], toRead: status)
+    }
+
+    private func wait(for element: XCUIElement, toRead label: String) {
+        let expectation = XCTNSPredicateExpectation(
+            predicate: NSPredicate(format: "label == %@", label), object: element)
         let result = XCTWaiter.wait(for: [expectation], timeout: 10)
-        XCTAssertEqual(result, .completed, "The status reads “\(line.label)” instead of “\(status)”")
+        XCTAssertEqual(result, .completed, "“\(element.label)” instead of “\(label)”")
+    }
+
+    private func scrollIntoView(_ element: XCUIElement, in app: XCUIApplication) {
+        for _ in 0..<12 where !element.isHittable {
+            app.swipeUp()
+        }
+    }
+
+    /// Runs Apple's accessibility audit and logs every issue with the element it concerns. Navigation bar
+    /// titles are exempt from the Dynamic Type check: by design they keep their size and offer the Large
+    /// Content Viewer instead. Every other issue fails the test.
+    @available(iOS 17.0, *)
+    private func audit(_ app: XCUIApplication) throws {
+        let navigationBar = app.navigationBars.firstMatch.frame
+        try app.performAccessibilityAudit { issue in
+            let element = issue.element
+            print(
+                "Accessibility audit: \(issue.compactDescription); type \(element?.elementType.rawValue ?? 0),",
+                "label “\(element?.label ?? "")”, identifier “\(element?.identifier ?? "")”, frame \(element?.frame ?? .zero)"
+            )
+            if issue.auditType == .dynamicType, let element, navigationBar.contains(element.frame) { return true }
+            return false
+        }
     }
 
     private func disappears(_ element: XCUIElement) -> Bool {
