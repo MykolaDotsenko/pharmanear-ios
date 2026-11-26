@@ -9,6 +9,8 @@ struct PharmacyRow: View {
     let palette: NordicPalette
     let showMap: () -> Void
 
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
     private var isNearest: Bool { rank == 1 }
 
     private var name: String {
@@ -29,10 +31,7 @@ struct PharmacyRow: View {
                 Text(distance)
                     .font((isNearest ? Font.title : Font.title2).weight(.medium))
                     .monospacedDigit()
-                ViewThatFits(in: .horizontal) {
-                    HStack(spacing: 16) { actions }
-                    VStack(alignment: .leading, spacing: 0) { actions }
-                }
+                actionLayout { actions }
             }
         }
         .padding(14)
@@ -79,22 +78,35 @@ struct PharmacyRow: View {
         .accessibilityElement(children: .combine)
     }
 
+    // Preserve the identity of each action when Dynamic Type changes, and give larger labels room to wrap.
+    private var actionLayout: AnyLayout {
+        if dynamicTypeSize >= .xxxLarge {
+            AnyLayout(VStackLayout(alignment: .leading, spacing: 0))
+        } else {
+            AnyLayout(HStackLayout(spacing: 16))
+        }
+    }
+
     @ViewBuilder
     private var actions: some View {
         Button(action: showMap) {
             Label("Map preview", systemImage: "map")
                 .font(.subheadline.weight(.semibold))
+                .fixedSize(horizontal: false, vertical: true)
                 .frame(minHeight: 44)
         }
         .accessibilityLabel(Text("Map preview: \(name)"))
+        .accessibilityIdentifier("map-preview-\(pharmacy.id)")
         .accessibilityHint(Text("MapKit loads this pharmacy location; Apple receives network metadata."))
 
         Button(action: openInMaps) {
             Label("Open in Maps", systemImage: "arrow.up.right")
                 .font(.subheadline.weight(.semibold))
+                .fixedSize(horizontal: false, vertical: true)
                 .frame(minHeight: 44)
         }
         .accessibilityLabel(Text("Open in Maps: \(name)"))
+        .accessibilityIdentifier("open-maps-\(pharmacy.id)")
     }
 
     /// OSM separates rules with semicolons; a middle dot reads better and keeps each rule intact.
