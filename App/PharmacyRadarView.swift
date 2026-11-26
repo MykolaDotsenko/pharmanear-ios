@@ -37,6 +37,13 @@ struct PharmacyRadarView: View {
                     status
                     if let origin = location.point {
                         chart(origin: origin)
+                        if location.usesCompass {
+                            Text("Compass-up").font(.footnote)
+                        } else if location.heading != nil {
+                            Text("Direction of travel").font(.footnote)
+                        } else {
+                            Text("North-up").font(.footnote)
+                        }
                         Text("GPS accuracy: \(formatted(location.accuracy))")
                             .font(.footnote)
                         Text("Radar range: \(formatted(range))")
@@ -48,6 +55,7 @@ struct PharmacyRadarView: View {
                     if let distance {
                         Text(verbatim: formatted(distance))
                             .font(.largeTitle.monospacedDigit())
+                        if distance > range { Text("Target is outside the displayed range.") }
                         if location.fresh {
                             if near {
                                 Text("Near the mapped pharmacy. Look for its entrance.")
@@ -93,6 +101,7 @@ struct PharmacyRadarView: View {
         }
         .onChange(of: location.point) { _ in updateRange() }
         .onChange(of: location.accuracy) { _ in updateRange() }
+        .onChange(of: location.fresh) { _ in updateRange() }
         .onChange(of: target) { _ in
             range = distance.map { RadarGeometry.range(distance: $0) } ?? 200
             near = false
