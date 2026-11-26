@@ -68,7 +68,7 @@ import UIKit
     }
     private var hero: some View {
         VStack(alignment:.leading,spacing:15) {
-            Text(t("eyebrow")).font(.caption.weight(.semibold)).tracking(1.7).foregroundStyle(palette.pine)
+            Text(t("eyebrow")).font(.caption.weight(.semibold)).tracking(1.7).foregroundStyle(palette.festiveInk)
             Text(t("heading"))
                 .font(.system(finder.status == "idle" ? .largeTitle : .title2,design:.serif,weight:.regular))
                 .accessibilityAddTraits(.isHeader)
