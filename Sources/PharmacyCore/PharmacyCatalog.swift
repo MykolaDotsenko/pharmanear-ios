@@ -42,6 +42,8 @@ public actor PharmacyCatalog {
     private var snapshot: Snapshot?
     private var didLoadBundled = false
     private var lastRefreshAttempt: Date?
+    private var refreshing = false
+    private var refreshWaiters: [CheckedContinuation<Void, Never>] = []
 
     init(
         loadBundled: @escaping @Sendable () throws -> Data = { try PharmacyCatalog.bundledData() },
@@ -93,11 +95,26 @@ public actor PharmacyCatalog {
             didLoadBundled = true
             snapshot = try? Snapshot(data: loadBundled())
         }
+        // Actor isolation alone does not prevent interleaving across an await.
+        // A concurrent lookup waits for the in-flight refresh before deciding on live fallback.
+        while refreshing {
+            await withCheckedContinuation { continuation in
+                refreshWaiters.append(continuation)
+            }
+            if Task.isCancelled { return nil }
+        }
         let date = now()
         let current = snapshot.flatMap { $0.isUsable(at: date) ? $0 : nil }
         guard needsRefresh(current, at: date) else { return current }
 
         lastRefreshAttempt = date
+        refreshing = true
+        defer {
+            refreshing = false
+            let waiters = refreshWaiters
+            refreshWaiters.removeAll()
+            for waiter in waiters { waiter.resume() }
+        }
         let latest = await latestSnapshot()
         if Task.isCancelled {
             // A cancelled search says nothing about the network, so the next search may try again.
