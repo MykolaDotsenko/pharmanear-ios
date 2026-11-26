@@ -122,11 +122,12 @@ private struct ContourArt: View {
     @StateObject private var finder = Finder()
     @State private var city = 0
     @State private var language = "en"
+    @State private var selectedMap: Pharmacy?
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.dynamicTypeSize) private var typeSize
     private var palette: NordicPalette { NordicPalette(dark:colorScheme == .dark) }
-    private func t(_ key: String) -> String { words[language]?[key] ?? words["en"]?[key] ?? key }
+    private func t(_ key: String) -> String { words[language]?[key] ?? extraWords[language]?[key] ?? words["en"]?[key] ?? extraWords["en"]?[key] ?? key }
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -137,6 +138,7 @@ private struct ContourArt: View {
                     VStack(alignment:.leading,spacing:8) {
                         Rectangle().fill(palette.line).frame(height:1).accessibilityHidden(true)
                         Text(t("disclaimer")).font(.footnote).foregroundStyle(palette.muted)
+                        Link(t("directory"),destination:URL(string:"https://www.apteekki.fi/apteekkihaku")!).font(.subheadline).frame(minHeight:44)
                         Link("© OpenStreetMap contributors",destination:URL(string:"https://www.openstreetmap.org/copyright")!).font(.footnote).frame(minHeight:44)
                     }
                 }
@@ -166,6 +168,9 @@ private struct ContourArt: View {
                     .accessibilityIdentifier("language")
                 }
             }
+        }
+        .sheet(item:$selectedMap) { pharmacy in
+            PharmacyMapSheet(pharmacy:pharmacy,title:t("mapTitle"),close:t("closeMap"),disclosure:t("mapPrivacy"),unnamed:t("unnamed"))
         }
         .environment(\.locale,Locale(identifier:language))
     }
@@ -252,6 +257,7 @@ private struct ContourArt: View {
                     if index == 0 { Text(t("nearest")).font(.caption.weight(.semibold)).foregroundStyle(palette.pine) }
                     Text(name).font(.headline).fixedSize(horizontal:false,vertical:true)
                     if !pharmacy.address.isEmpty { Text(pharmacy.address).font(.subheadline).foregroundStyle(palette.muted) }
+                    Text(pharmacy.hours.isEmpty ? t("missingHours") : t("hours")+": "+pharmacy.hours).font(.footnote).foregroundStyle(palette.muted)
                 }
                 Spacer(minLength:0)
             }
@@ -266,6 +272,9 @@ private struct ContourArt: View {
                     Label(t("map"),systemImage:"arrow.up.right").font(.subheadline.weight(.semibold)).frame(minHeight:44)
                 }.accessibilityLabel(t("map")+": "+name)
             }
+            Button { selectedMap=pharmacy } label: { Label(t("mapHere"),systemImage:"map").font(.subheadline.weight(.semibold)).frame(minHeight:44) }
+                .accessibilityLabel(t("mapHere")+": "+name).accessibilityHint(t("mapPrivacy"))
+            Text(t("mapPrivacy")).font(.caption).foregroundStyle(palette.muted)
         }
         .padding(14)
         .background(index == 0 ? palette.wash : Color.clear)
@@ -276,7 +285,7 @@ private struct ContourArt: View {
     }
     private var statusText: String {
         guard finder.status == "found",let result=finder.result else { return t(finder.status) }
-        return "\(t("found")): \(result.pharmacies.count) · \(finder.origin == "device" ? t("device") : finder.origin). \(result.covered ? "" : t("limited"))"
+        return "\(t("found")): \(result.pharmacies.count) · \(finder.origin == "device" ? t("device") : finder.origin). \(result.covered ? "" : t("limited")) \(result.pharmacies.count > 20 ? t("shown") : "")"
     }
     private func formattedDistance(_ meters:Double) -> String {
         let value=meters < 1000 ? Measurement(value:meters,unit:UnitLength.meters) : Measurement(value:meters/1000,unit:UnitLength.kilometers)
@@ -292,3 +301,39 @@ private let words: [String:[String:String]] = [
 "en":["eyebrow":"PHARMACY FINDER","heading":"Find a pharmacy near you.","intro":"Find the closest mapped pharmacies by straight-line distance. No account needed.","locate":"Use my location","privacy":"Only a location rounded to two decimal places is sent to the Overpass service. Distances are calculated on your device.","city":"City centre","search":"Search","results":"Nearby pharmacies","cancel":"Cancel","idle":"Choose your location to start.","locating":"Getting your location…","loading":"Searching for pharmacies…","denied":"Location is unavailable or denied. Choose a city centre instead.","error":"Search is temporarily unavailable. Try again.","empty":"No mapped pharmacies found within the searched area.","found":"Mapped pharmacies found","device":"your location","limited":"Search coverage is limited.","nearest":"Closest mapped result","unnamed":"Unnamed pharmacy","map":"View on map","disclaimer":"Distances are not walking routes. Check opening hours before travelling. Map data can be incomplete.","language":"Language","cancelled":"Search cancelled."],
 "fi":["eyebrow":"APTEEKKIHAKU","heading":"Löydä apteekki läheltäsi.","intro":"Löydä lähimmät kartalla olevat apteekit linnuntie-etäisyyden mukaan. Et tarvitse tiliä.","locate":"Käytä sijaintiani","privacy":"Overpass-palveluun lähetetään vain kahden desimaalin tarkkuuteen pyöristetty sijainti. Etäisyydet lasketaan laitteellasi.","city":"Kaupungin keskusta","search":"Hae","results":"Lähellä olevat apteekit","cancel":"Peruuta","idle":"Valitse sijainti aloittaaksesi.","locating":"Haetaan sijaintia…","loading":"Haetaan apteekkeja…","denied":"Sijaintia ei saatu. Valitse kaupungin keskusta.","error":"Haku ei ole juuri nyt käytettävissä. Yritä uudelleen.","empty":"Hakualueelta ei löytynyt kartalla olevia apteekkeja.","found":"Kartalta löytyneet apteekit","device":"oma sijainti","limited":"Haun kattavuus on rajallinen.","nearest":"Lähin karttatulos","unnamed":"Nimetön apteekki","map":"Näytä kartalla","disclaimer":"Etäisyydet eivät ole kävelyreittejä. Tarkista aukioloajat ennen lähtöä. Karttatiedot voivat olla puutteellisia.","language":"Kieli","cancelled":"Haku peruttu."],
 "sv":["eyebrow":"APOTEKSSÖKNING","heading":"Hitta ett apotek nära dig.","intro":"Hitta närmaste kartlagda apotek enligt fågelvägsavstånd. Inget konto behövs.","locate":"Använd min plats","privacy":"Endast en position avrundad till två decimaler skickas till Overpass-tjänsten. Avstånd beräknas på din enhet.","city":"Stadscentrum","search":"Sök","results":"Apotek i närheten","cancel":"Avbryt","idle":"Välj en plats för att börja.","locating":"Hämtar din plats…","loading":"Söker apotek…","denied":"Platsen är otillgänglig. Välj ett stadscentrum.","error":"Sökningen är tillfälligt otillgänglig. Försök igen.","empty":"Inga kartlagda apotek hittades i sökområdet.","found":"Kartlagda apotek hittades","device":"din plats","limited":"Sökningens täckning är begränsad.","nearest":"Närmaste kartresultat","unnamed":"Namnlöst apotek","map":"Visa på karta","disclaimer":"Avstånden är inte promenadrutter. Kontrollera öppettiderna innan du åker. Kartdata kan vara ofullständiga.","language":"Språk","cancelled":"Sökningen avbröts."]]
+
+
+// MapKit is created only after an explicit tap. User-location overlay is disabled.
+private struct PharmacyMapSheet: View {
+    let pharmacy: Pharmacy
+    let title: String
+    let close: String
+    let disclosure: String
+    let unnamed: String
+    @Environment(\.dismiss) private var dismiss
+    @State private var region: MKCoordinateRegion
+    init(pharmacy:Pharmacy,title:String,close:String,disclosure:String,unnamed:String) {
+        self.pharmacy=pharmacy;self.title=title;self.close=close;self.disclosure=disclosure;self.unnamed=unnamed
+        _region=State(initialValue:MKCoordinateRegion(center:CLLocationCoordinate2D(latitude:pharmacy.point.lat,longitude:pharmacy.point.lon),span:MKCoordinateSpan(latitudeDelta:0.018,longitudeDelta:0.025)))
+    }
+    var body: some View {
+        NavigationStack {
+            VStack(alignment:.leading,spacing:12) {
+                Text(pharmacy.name.isEmpty ? unnamed : pharmacy.name).font(.headline)
+                Text(disclosure).font(.footnote).foregroundStyle(.secondary)
+                Map(coordinateRegion:$region,showsUserLocation:false,annotationItems:[pharmacy]) { p in
+                    MapMarker(coordinate:CLLocationCoordinate2D(latitude:p.point.lat,longitude:p.point.lon),tint:.green)
+                }
+                .accessibilityLabel(title+" "+(pharmacy.name.isEmpty ? unnamed : pharmacy.name))
+                .frame(maxWidth:.infinity,maxHeight:.infinity)
+                if !pharmacy.address.isEmpty { Text(pharmacy.address).font(.subheadline) }
+            }.padding().navigationTitle(title).navigationBarTitleDisplayMode(.inline)
+            .toolbar { ToolbarItem(placement:.cancellationAction) { Button(close) { dismiss() } } }
+        }
+    }
+}
+private let extraWords:[String:[String:String]] = [
+ "en":["hours":"Mapped hours (unverified)","missingHours":"Hours not listed","mapHere":"Map preview","closeMap":"Close map","mapTitle":"Pharmacy map","mapPrivacy":"MapKit loads this pharmacy location; Apple receives network metadata.","directory":"Check Finnish pharmacy details at Apteekki.fi","shown":"Showing up to 20"],
+ "fi":["hours":"Karttaan merkityt aukioloajat (vahvistamatta)","missingHours":"Aukioloaikoja ei ilmoitettu","mapHere":"Karttanäkymä","closeMap":"Sulje kartta","mapTitle":"Apteekin kartta","mapPrivacy":"MapKit lataa apteekin sijainnin; Apple saa verkkoyhteyden metatietoja.","directory":"Tarkista apteekin tiedot Apteekki.fi-palvelusta","shown":"Näytetään enintään 20"],
+ "sv":["hours":"Kartlagda öppettider (ej bekräftade)","missingHours":"Öppettider saknas","mapHere":"Kartvy","closeMap":"Stäng kartan","mapTitle":"Apotekskarta","mapPrivacy":"MapKit laddar apotekets plats; Apple får nätverksmetadata.","directory":"Kontrollera apoteksuppgifter på Apteekki.fi","shown":"Visar högst 20"]
+]

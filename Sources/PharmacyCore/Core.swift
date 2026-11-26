@@ -21,6 +21,7 @@ public struct Pharmacy: Identifiable, Equatable, Sendable {
     public let address: String
     public let point: Point
     public let distance: Double
+    public var hours: String = ""
 }
 public struct SearchResult: Sendable {
     public let pharmacies: [Pharmacy]
@@ -47,7 +48,7 @@ public enum PharmacySearch {
             guard ["node","way","relation"].contains(e.type), let lat = e.lat ?? e.center?.lat, let lon = e.lon ?? e.center?.lon, let tags = e.tags, tags["amenity"] == "pharmacy" else { return nil }
             let point = Point(lat:lat,lon:lon), id = "\(e.type)/\(e.id)"
             guard point.valid, seen.insert(id).inserted else { return nil }
-            return .init(id:id,name:tags["name"] ?? "",address:["addr:street","addr:housenumber","addr:city"].compactMap{tags[$0]}.joined(separator:" "),point:point,distance:origin.distance(to:point))
+            return .init(id:id,name:tags["name"] ?? "",address:["addr:street","addr:housenumber","addr:city"].compactMap{tags[$0]}.joined(separator:" "),point:point,distance:origin.distance(to:point),hours:String((tags["opening_hours"] ?? "").trimmingCharacters(in:.whitespacesAndNewlines).prefix(240)))
         }.sorted { $0.distance == $1.distance ? $0.id < $1.id : $0.distance < $1.distance }
     }
     public static func search(origin: Point, fetch: @Sendable (String) async throws -> Data) async throws -> SearchResult {

@@ -54,3 +54,16 @@ extension CoreTests {
         XCTAssertTrue(result.covered)
     }
 }
+
+extension CoreTests {
+    func testMappedScheduleIsTrimmedAndMissingRemainsUnknown() throws {
+        let data=Data(#"{"elements":[{"type":"node","id":1,"lat":60.45,"lon":22.27,"tags":{"amenity":"pharmacy","opening_hours":" Mo-Fr 09:00-18:00 "}},{"type":"node","id":2,"lat":60.46,"lon":22.27,"tags":{"amenity":"pharmacy"}}]}"#.utf8)
+        let rows=try PharmacySearch.normalize(data,origin:origin)
+        XCTAssertEqual(rows.first(where:{$0.id=="node/1"})?.hours,"Mo-Fr 09:00-18:00")
+        XCTAssertEqual(rows.first(where:{$0.id=="node/2"})?.hours,"")
+    }
+    func testMappedScheduleLengthBound() throws {
+        let data=try JSONSerialization.data(withJSONObject:["elements":[["type":"node","id":1,"lat":60.45,"lon":22.27,"tags":["amenity":"pharmacy","opening_hours":String(repeating:"x",count:400)]]]])
+        XCTAssertEqual(try PharmacySearch.normalize(data,origin:origin).first?.hours.count,240)
+    }
+}
